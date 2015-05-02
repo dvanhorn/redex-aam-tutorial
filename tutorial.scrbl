@@ -1987,6 +1987,19 @@ complicated to express this invariant because the representation
 relation must be defined modulo consistent renaming of variables.)
 }
 
+@bibliography[
+ @bib-entry[#:key "PCF"
+            #:title "LCF considered as a programming language"
+            #:author "Gordon Plotkin"
+            #:date "1977"
+            #:location "Theoretical Computer Science 5: 223–255"
+            #:url "http://homepages.inf.ed.ac.uk/gdp/publications/LCF.pdf"]
+ @bib-entry[#:key "Redex"
+            #:title "Semantics Engineering with PLT Redex"
+            #:author "Matthias Felleisen, Robert Bruce Findler and Matthew Flatt"
+            #:date "July, 2009"
+            #:location "MIT Press"]]
+
 @section{Appendix: Substitution}
 
 @interaction[#:eval redex-eval
