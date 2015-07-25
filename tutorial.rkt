@@ -713,7 +713,7 @@
 
 
 (current-cache-all? #t)
-(apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
+;(apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
 (test-->> -->vσ^ (term (injσ∘ fact-5)) 1 'num)
 
 ;(define -->vσ*^ (-->vσ*^/alloc alloc*^))
