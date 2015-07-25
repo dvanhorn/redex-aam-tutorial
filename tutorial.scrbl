@@ -655,7 +655,7 @@ reduction.  For example:
 
 produces:
 
-@image[#:suffixes '(".pdf" ".png") #:scale .8]{reduction}
+@image[#:suffixes '(".pdf" ".png") #:scale .8]{img/reduction}
 
 Notice that the @racket[traces] window visualizes all possible
 reduction sequences.
@@ -690,7 +690,7 @@ does the left-most, outer-most call-by-name reduction.
 (eval:alts (traces -->n (term ((λ ([x : num]) x) (add1 5)))) (void))
 ]
 
-@image[#:suffixes '(".pdf" ".png") #:scale .8]{cbn-reduction}
+@image[#:suffixes '(".pdf" ".png") #:scale .8]{img/cbn-reduction}
 
 Unlike @racket[-->r], we can use @racket[-->n] to calculate
 @racket[fact-5]:
@@ -752,7 +752,7 @@ it reduces and @emph{what} it reduces:
 (eval:alts (traces -->v (term ((λ ([x : num]) x) (add1 5)))) (void))
 ]
 
-@image[#:suffixes '(".pdf" ".png") #:scale .8]{cbv-reduction}
+@image[#:suffixes '(".pdf" ".png") #:scale .8]{img/cbv-reduction}
 
 And like @racket[-->n], it produces an answer for @racket[fact-5]:
 @interaction[#:eval redex-eval 
@@ -1158,7 +1158,7 @@ and redexes.
 (eval:alts (traces -->vς (term (injς ((λ ([x : num]) x) (add1 5))))) (void))
 ]
 
-@image[#:suffixes '(".pdf" ".png")]{machine-reduction}
+@image[#:suffixes '(".pdf" ".png")]{img/machine-reduction}
 
 
 @subsection{Heap-allocated bindings}
