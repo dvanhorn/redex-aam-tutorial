@@ -1,7 +1,10 @@
 #lang scribble/manual
+@(require scriblib/autobib)
 @(require scribble/lp-include
           (for-label (except-in racket _ add1 sub1 ... λ + * -> string any) 
                      (except-in redex I O)))
+
+@(define-cite ~cite citet generate-bibliography)
 
 @(require racket/sandbox
           scribble/eval)
@@ -18,6 +21,56 @@
    (make-eval
     '(require redex racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
 
+@(define bib:pcf
+  (make-bib
+   #:title "LCF considered as a programming language"
+   #:author "Gordon Plotkin"
+   #:date "1977"
+   #:location (journal-location "Theoretical Computer Science"
+				#:volume "5"
+				#:pages (list "223" "255"))
+   #:url "http://homepages.inf.ed.ac.uk/gdp/publications/LCF.pdf"))
+
+@(define bib:redex
+  (make-bib
+   #:title "Semantics Engineering with PLT Redex"
+   #:author (authors "Matthias Felleisen"
+		     "Robert Bruce Findler" 
+		     "Matthew Flatt")
+   #:date "2009" ; July
+   #:location (book-location #:publisher "MIT Press")))
+
+@(define bib:explicit
+   (make-bib
+    #:title "Explicit Substitutions"
+    #:author (authors "Martin Abadi"
+		      "Luca Cardelli"
+		      "Pierre-Louis Curien"
+		      "Jean-Jacques Levy")
+    #:location (journal-location "Journal of Functional Programming"
+				 #:volume "1"
+				 #:number "4"
+				 #:pages  (list "375" "416"))
+    #:date "1991" ; October
+    ))
+
+@(define bib:muchnick-jones
+   (make-bib
+    #:title "Program Flow Analysis: Theory and Applications"
+    #:author (authors "Steven S. Muchnick"
+		      "Neil D. Jones")
+    #:location (book-location #:publisher "Prentice Hall")
+    #:date "1981"))
+
+@(define bib:aam
+   (make-bib
+    #:title "Abstracting Abstract Machines"
+    #:author (authors (author-name "David" "Van Horn")
+		      "Matthew Might")
+    #:location "ICFP"
+    #:date "2010"))
+
+
 @title{An Introduction to Redex with Abstracting Abstract Machines}
 
 @author+email["David Van Horn" "dvanhorn@cs.umd.edu"]
@@ -28,7 +81,7 @@ This article provides a brief introduction to the Redex programming
 language for semantic modelling.  It does so by developing several
 semantic models of a simple programming language and then showing how
 to construct a program analyzer for this language using the
-``Abstracting Abstract Machines'' method.
+``Abstracting Abstract Machines'' method@~cite[bib:aam].
 
 So this tutorial aims to accomplish two goals:
 
@@ -52,7 +105,7 @@ detailed construction.
 
 @subsection{What is Redex?}
 
-Redex is a scripting language and set of associated tools supporting
+Redex@~cite[bib:redex] is a scripting language and set of associated tools supporting
 the conception, design, construction, and testing of semantic systems
 such as programming languages, type systems, program logics, and
 program analyses.  As a scripting language, it enables an engineer to
@@ -206,10 +259,10 @@ outside of @racket[term] causes a syntax error:
 
 Now that we have seen the basics, we can move on to a real example.
 
-@section{Scott's PCF}
+@section{PCF}
 
 Let's start by building a model of a very simple, typed functional
-programming language based on Scott's PCF language @cite{PCF}.
+programming language based on PCF language@~cite[bib:pcf].
 Although simple, PCF contains all the essential elements of a real
 programming language.  Scaling the approach of these notes up to a
 more sophisticated language is just a small matter of semantic
@@ -520,7 +573,7 @@ To calculate with PCF programs, we start by formulating a
 @deftech{reduction relation} that captures the axioms of reduction for
 PCF:
 
-@(redex-eval '(require redex-aam-tutorial/subst))
+@(redex-eval '(require redex-aam-tutorial/shared))
 
 @; Forward place holder definition
 @(redex-eval
@@ -973,7 +1026,7 @@ substitution, we can also formulate computation as a reduction system
 based on environments that is substitution-free.  Such a reduction
 semantics is known as an @deftech{explicit substitution} semantics
 since the meta-theoretic notion of substitution is represented
-explicit in the system.
+explicit in the system@~cite[bib:explicit].
 
 @interaction[#:eval redex-eval
 (define-extended-language PCFρ PCF⇓
@@ -1242,6 +1295,8 @@ each formal parameter name:
          (term (formals M)))])
 ]
 
+@margin-note{A transgression has just occurred.  Can you spot it?}
+
 For example:
 
 @interaction[#:eval redex-eval
@@ -1273,6 +1328,9 @@ previous semantics and computes the correct result for
 It's easy to see that from an initial configuration @racket[-->vσ]
 reduction operates in lock-step with @racket[-->vς] reduction (modulo
 the possibility of a final @racket[discard-Σ] step).
+
+@bold{Exercise}: formulate and test an invariant between 
+@racket[-->vσ] and @racket[-->vς].
 
 @subsection{Abstracting over @racket[alloc]}
 
@@ -1472,7 +1530,7 @@ redex configurations:
 
 Now, because we have overridden the meaning of states, we really want
 to compute an extension, not of @racket[-->vσ], but of @racket[-->vσ]
-using @racket[alloc*]; otherwise there will be failure to match errors
+@emph{using} @racket[alloc*]; otherwise there will be failure to match errors
 because of the mismatch between @racket[alloc] and @racket[PCFσ*].  In
 other words, we want to compute an extension of @racket[(-->vσ/alloc
 alloc*)].  And because we're likely to want to extend @racket[-->vσ*]
@@ -1554,8 +1612,7 @@ descriptions such as this (emphasis added):
 @nested[#:style 'inset]{
 @italic{
 [Program] analysis is a tool for discovering properties of the
-run-time behavior of a program @bold{without actually running it}
-@cite{Muchnick-Jones}.
+run-time behavior of a program @bold{without actually running it}@~cite[bib:muchnick-jones].
 }}
 
 This is partly on the mark: program analysis is about discovering what
@@ -1563,14 +1620,14 @@ happens when a program is run.  Exactly what we want to discover
 depends on the particular application we have in mind.  Perhaps we
 want to know if the program causes an error, or leaks your contacts to
 spammers, or whether a particular piece of code is dead, or to which
-arguments are a particular function is applied, etc.
+arguments are a particular function applied, etc.
 
 But why should we do this @italic{@bold{without}} running the program?
 Isn't that the most straightforward way to discover such properties?
 
 Well, there are a number of problems with just running a program; two
 prominent ones are (1) maybe it doesn't terminate, and (2) maybe we
-want to consider all possible executions of a program, not just one.
+want to consider @emph{all} possible executions of a program, not just one.
 
 These problems have motivated long and varied lines of research in
 ways of discovering program properties through means other than
@@ -1625,28 +1682,20 @@ We will discover properties of the run-time behavior of a program
 
 @subsection{Abstracting over @racket[Σ]}
 
-@interaction[#:eval redex-eval
-(define-judgment-form REDEX
-  #:mode (lookup-Σ I I O)
-  #:contract (lookup-Σ any_r any_k any_v)
-  [(lookup-Σ any_r any_k any_v)
-   (where (_ ... any_v _ ...)
-          ,(set->list
-            (hash-ref (term any_r)
-                      (term any_k))))])
+With @racket[PCFσ*], we had a machine with heap-bound bindings and
+continuations.  One of the key mechanisms for turning a concrete
+semantics into a computable, approximating semantics is to bound the
+size of this heap.  As we'll see, doing requires using a different
+notion of a heap (an ``abstract'' heap).
 
-(define-metafunction REDEX
-  ext-Σ1 : any (any any) -> any
-  [(ext-Σ1 any_r (any_k any_v))
-   ,(hash-set (term any_r)
-              (term any_k)
-              (set-add (hash-ref (term any_r) (term any_k) (set))
-                       (term any_v)))])
+So our next step will be an abstraction of the @racket[PCFσ*] machine
+to factor out the signature of heaps as an abstract data type.  We do
+this by a syntactic abstraction over the signature of heaps, namely
+the @racket[ext] and @racket[lookup] operations (recall that we've
+already abstracted over allocations functions).
 
-(define-term Σ∅ ,(hash))
-]
-
-
+To start, we have to go back to @racket[-->vσ] and abstract it as
+follows:
 
 @interaction[#:eval redex-eval
 (define-syntax-rule (-->vσ/Σ alloc ext-Σ lookup-Σ)
@@ -1671,20 +1720,19 @@ We will discover properties of the run-time behavior of a program
          rec-β))))
 ]
 
+
+It's easy to recreate and test our previous relations and abstractions:
 @interaction[#:eval redex-eval
 (define-syntax-rule 
   (-->vσ/alloc alloc)
   (-->vσ/Σ alloc ext lookup))
-]
 
-@interaction[#:eval redex-eval
 (define -->vσ (-->vσ/alloc alloc))
-]
 
-@interaction[#:eval redex-eval
 (test-->> -->vσ (term (injσ fact-5)) 120)
 ]
 
+Next, we abstract @racket[-->vσ*]:
 
 @interaction[#:eval redex-eval
 (define-syntax-rule
@@ -1693,7 +1741,7 @@ We will discover properties of the run-time behavior of a program
    (extend-reduction-relation
     (-->vσ/Σ alloc* ext-Σ lookup-Σ)
     PCFσ*
-    ;; Eval
+    @code:comment{Eval}
     (--> (name σ (((if0 S_0 C_1 C_2) K) Σ))
          ((S_0 ((if0 [] C_1 C_2) A)) (ext-Σ Σ (A K)))
          (where (A) (alloc* σ))        
@@ -1704,7 +1752,7 @@ We will discover properties of the run-time behavior of a program
          (where (A) (alloc* σ))
          ev-app)
     
-    ;; Continue   
+    @code:comment{Continue}
     (--> ((V ((if0 [] C_1 C_2) A)) Σ)
          (((if0 V C_1 C_2) K) Σ)
          (judgment-holds (lookup-Σ Σ A K))
@@ -1714,7 +1762,11 @@ We will discover properties of the run-time behavior of a program
          (((V_0 ... V C_0 ...) K) Σ)
          (judgment-holds (lookup-Σ Σ A K))
          co-app))))
+]
 
+And recreate and test:
+
+@interaction[#:eval redex-eval
 (define-syntax-rule
   (-->vσ*/alloc alloc*)
   (-->vσ*/Σ alloc* ext lookup))
@@ -1724,8 +1776,43 @@ We will discover properties of the run-time behavior of a program
 (test-->> -->vσ* (term (injσ fact-5)) 120)
 ]
 
-
 @subsection{Set-based heap}
+
+It's now easy to construct new implementations of heaps and use them
+to define new relations.  For example, here is an implementation that
+models a heap as a Racket hash table that maps keys to @emph{sets} of
+values.
+
+@interaction[#:eval redex-eval
+(define-judgment-form REDEX
+  #:mode (lookup-Σ I I O)
+  #:contract (lookup-Σ any_r any_k any_v)
+  [(lookup-Σ any_r any_k any_v)
+   (where (_ ... any_v _ ...)
+          ,(set->list
+            (hash-ref (term any_r)
+                      (term any_k)
+		      '())))])
+
+(define-metafunction REDEX
+  ext-Σ1 : any (any any) -> any
+  [(ext-Σ1 any_r (any_k any_v))
+   ,(hash-set (term any_r)
+              (term any_k)
+              (set-add (hash-ref (term any_r) (term any_k) (set))
+                       (term any_v)))])
+
+(define-metafunction REDEX
+  ext-Σ : any (any any) ... -> any
+  [(ext-Σ any_r) any_r]
+  [(ext-Σ any_r any_kv0 any_kv1 ...)
+   (ext-Σ (ext-Σ1 any_r any_kv0) any_kv1 ...)])
+
+(define-term Σ∅ ,(hash))
+]
+
+We have to extend the @racket[PCFσ*] language to reflect our change in
+the representation of heaps:
 
 @interaction[#:eval redex-eval
 (define-extended-language PCFσ∘ PCFσ*
@@ -1737,8 +1824,11 @@ We will discover properties of the run-time behavior of a program
    PCFσ∘))
 
 (define-metafunction/extension alloc* PCFσ∘
-  alloc∘ : σ -> (A ...))
+  alloc∘ : σ -> (A ...))]
 
+Finally, we define @racket[-->vσ∘]:
+
+@interaction[#:eval redex-eval
 (define -->vσ∘ (-->vσ∘/Σ alloc∘ ext-Σ lookup-Σ))
 
 (define-metafunction PCFσ∘
@@ -1748,16 +1838,25 @@ We will discover properties of the run-time behavior of a program
 (test-->> -->vσ∘ (term (injσ∘ fact-5)) 120)
 ]
 
+It's important to note that @racket[-->vσ∘] computes exactly what
+@racket[-->vσ*] does, just with a different representation.  Everwhere
+that you see a heap binding @racketresult[x] to @racketresult[v], in
+the @racket[PCFσ*] state, you'll see an association @racketresult[(x
+v)], whereas in the @racket[PCFσ∘] state, you'll see a hash table
+mapping @racketresult[x] to the singleton set containing
+@racketresult[v].
+
 @subsection{Make it finite}
 
 One way to make the interpretation of a program computable is to make
 the space of program states finite.  Think about this way, when
-@racket[-->vσ*] runs forever interpreting a program, it must be
-exploring an infinite subset of the domain @racket[σ*].  We could
-design an approximation of @racket[-->vσ*] that operates on a finite
-approximation of @racket[σ*].  If the approximation of @racket[σ*] is
-finite, there's no way a program can run forever since there is no
-infinite subset of the finite approximation of @racket[σ*].
+@racket[-->vσ*] (or equivalently, @racket[-->vσ∘]) runs forever
+interpreting a program, it must be exploring an infinite subset of the
+domain @racket[σ*].  We could design an approximation of
+@racket[-->vσ*] that operates on a finite approximation of
+@racket[σ*].  If the approximation of @racket[σ*] is finite, there's
+no way a program can run forever since there is no infinite subset of
+the finite approximation of @racket[σ*].
 
 In this section, we'll develop such a finite approximation.
 
@@ -1805,7 +1904,17 @@ produces @racket[num]:
   [(δ^ (O N) num)])
 ]
 
-Alloc:
+
+Moving on to the taming memory, we will replace the allocation
+function with an alternative that only produces a @emph{finite} set of
+addresses.  We could choose any strategy for finitizing the allocation
+function, and the particular strategy you choose will have major
+consequences for the program analysis you construct.  One simple
+method for finitizing allocation is to @emph{truncate} the results of
+@racket[alloc∘] to a single symbol.  In the case of variable bindings
+this symbol will just be the name of the variable.  Consequently, the
+approximation we compute will be what's known as a
+@deftech{monovariant} analysis:
 
 @interaction[#:eval redex-eval
 (define-metafunction/extension alloc∘ PCFσ^
@@ -1820,32 +1929,17 @@ Alloc:
 
 
 Besides primitive operations, there's one other consumer of numbers:
-the conditional form @racket[if0].
+the conditional form @racket[if0].  We want to design the semantics of
+@racket[if0] in combination with the abstraction @racket[num] so that
+it covers all behavior abstracted by @racket[num].  Since a number may
+be zero or non-zero, we add cases to the reduction relation to take
+both branches when a conditional encounters @racket[num]:
 
 @interaction[#:eval redex-eval
 (define -->vσ^ 
   (extend-reduction-relation
    (-->vσ∘/Σ alloc^ ext-Σ lookup-Σ)
    PCFσ^
-   
-   ;; BUG WORKAROUND: ρ-x, co-if, & co-app
-   ;; repeated here to work around 
-   ;; http://bugs.racket-lang.org/query/?cmd=view&pr=14660
-   (--> (((X ρ) K) Σ) ((V K) Σ) 
-        (judgment-holds (lookup ρ X A))
-        (judgment-holds (lookup-Σ Σ A V))
-        ρ-x)
-   ;; Continue   
-   (--> ((V ((if0 [] C_1 C_2) A)) Σ)
-        (((if0 V C_1 C_2) K) Σ)
-        (judgment-holds (lookup-Σ Σ A K))
-        co-if)
-   
-   (--> ((V ((V_0 ... [] C_0 ...) A)) Σ)
-        (((V_0 ... V C_0 ...) K) Σ)
-        (judgment-holds (lookup-Σ Σ A K))
-        co-app)
-   
    (--> (((O N ...) K) Σ)
         ((N_1 K) Σ)
         (judgment-holds (δ^ (O N ...) N_1))
@@ -1858,15 +1952,21 @@ the conditional form @racket[if0].
         if0-num-f)))
 ]
 
+Notice that now the reduction relation is truly a relation and not a
+function; some terms have multiple successors:
 @interaction[#:eval redex-eval
-(current-cache-all? #t)
-]
+(apply-reduction-relation* -->vσ^ (term (injσ∘ (if0 (add1 0) 1 2))))]
 
 
+Now when we abstractly run our example, we see that results include
+@racket[num]:
 @interaction[#:eval redex-eval
 (apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
 ]
 
+Here's another example that shows the approximation in bindings.
+Notice that @racket[_z] is bound to both @racket[0] and @racket[1], so
+both are given as possible results for this program:
 @interaction[#:eval redex-eval
 (apply-reduction-relation* 
  -->vσ^
@@ -1875,9 +1975,16 @@ the conditional form @racket[if0].
                (λ ([z : num]) z)))))
 ]
 
+Here's an example where we can see that @racketresult[Ω] does not
+terminate; thus the analysis proves non-termination for this program:
 @interaction[#:eval redex-eval
 (apply-reduction-relation* -->vσ^ (term (injσ∘ Ω)))
 ]
+
+@bold{Exercise}: develop an "approximation" relation between concrete
+states (@racket[]) and abstract states (@racket[]) and then formulate
+and test an invariant that states any concrete reduction implies the
+existence of a abstract reduction.
 
 @subsection{Discovering properties}
 
@@ -1987,18 +2094,7 @@ complicated to express this invariant because the representation
 relation must be defined modulo consistent renaming of variables.)
 }
 
-@bibliography[
- @bib-entry[#:key "PCF"
-            #:title "LCF considered as a programming language"
-            #:author "Gordon Plotkin"
-            #:date "1977"
-            #:location "Theoretical Computer Science 5: 223–255"
-            #:url "http://homepages.inf.ed.ac.uk/gdp/publications/LCF.pdf"]
- @bib-entry[#:key "Redex"
-            #:title "Semantics Engineering with PLT Redex"
-            #:author "Matthias Felleisen, Robert Bruce Findler and Matthew Flatt"
-            #:date "July, 2009"
-            #:location "MIT Press"]]
+@(generate-bibliography)
 
 @section{Appendix: Substitution}
 

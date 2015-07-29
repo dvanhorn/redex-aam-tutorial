@@ -1,75 +1,7 @@
 #lang racket
 (require redex)
-(require "subst.rkt")
+(require "shared.rkt")
 (provide (all-defined-out))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Generic utilities
-
-(define-language REDEX)
-
-(define-judgment-form REDEX
-  #:mode (lookup-Σ I I O)
-  #:contract (lookup-Σ any_r any_k any_v)
-  [(lookup-Σ any_r any_k any_v)
-   (where (_ ... any_v _ ...)
-	  ,(set->list
-	    (hash-ref (term any_r)
-		      (term any_k))))])
-
-(define-metafunction REDEX
-  ext-Σ1 : any (any any) -> any
-  [(ext-Σ1 any_r (any_k any_v))
-   ,(hash-set (term any_r)
-	      (term any_k)
-	      (set-add (hash-ref (term any_r) (term any_k) (set))
-		       (term any_v)))])
-
-(define-term Σ∅ ,(hash))
-
-(define-metafunction REDEX
-  ext-Σ : any (any any) ... -> any
-  [(ext-Σ any_r) any_r]
-  [(ext-Σ any_r any_kv0 any_kv1 ...)
-   (ext-Σ (ext-Σ1 any_r any_kv0) any_kv1 ...)])
-
-
-(define-judgment-form REDEX
-  #:mode (lookup I I O)
-  #:contract (lookup ((any any) ...) any any)
-  [(lookup (_ ... (any any_0) _ ...) any any_0)])
-
-(test-equal #t (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 1)))
-(test-equal #f (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 2)))
-(test-equal #t (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 3)))
-
-(define-judgment-form REDEX
-  #:mode (lookup* I I O)
-  [(lookup* any_assoc (any_k ...) (any_v ...))
-   (lookup any_assoc any_k any_v)
-   ...])
-
-(define-metafunction REDEX
-  ext : ((any any) ...) (any any) ... -> ((any any) ...)
-  [(ext any) any]
-  [(ext any any_0 any_1 ...)
-   (ext1 (ext any any_1 ...) any_0)])
-
-(define-metafunction REDEX
-  ext1 : ((any any) ...) (any any) -> ((any any) ...)
-  [(ext1 (any_0 ... (any_k any_v0) any_1 ...) (any_k any_v1))
-   (any_0 ... (any_k any_v1) any_1 ...)]
-  [(ext1 (any_0 ...) (any_k any_v1))
-   ((any_k any_v1) any_0 ...)])
-
-(define-relation REDEX
-  unique ⊆ any × ...
-  [(unique any_!_1 ...)])
-
-(test-equal #t (term (unique)))
-(test-equal #t (term (unique 1)))
-(test-equal #f (term (unique 1 2 3 2)))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Syntax
@@ -98,11 +30,15 @@
 	     (* n (fact (sub1 n))))))
    5))
 
-(test-equal (redex-match? PCF M (term fact-5)) true)
+(module+ test
+  (test-equal (redex-match? PCF M (term fact-5)) true))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reduction semantics
+
+(module+ test
+  (test-->>∃ -->r (term fact-5) 120))
 
 (define r
   (reduction-relation
@@ -135,11 +71,18 @@
   [(δ (sub1 N) ,(sub1 (term N)))]
   [(δ (add1 N) ,(add1 (term N)))])
 
-(test-->>∃ -->r (term fact-5) 120)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Typing relation
+
+(module+ test
+  (test-equal
+   (judgment-holds (⊢ () fact-5 : T) T)
+   (term (num)))
+  
+  (test-equal
+   (judgment-holds (⊢ () (λ ([x : num] [x : num]) x) : T) T)
+   (term ())))
 
 (define-extended-language PCFT PCF
   (Γ ::= ((X T) ...)))
@@ -181,15 +124,13 @@
    ------------------------------------------ λ
    (⊢ Γ (λ ([X : T] ...) M) : (T ... -> T_n))])
 
-(test-equal (judgment-holds (⊢ () fact-5 : T) T)
-	    (term (num)))
-
-(test-equal (judgment-holds (⊢ () (λ ([x : num] [x : num]) x) : T) T)
-	    (term ()))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Evaluation relation
+
+(module+ test
+  (test-equal (judgment-holds (⇓ fact-5 () : V) V)
+              (term (120))))
 
 (define-extended-language PCF⇓ PCF
   (V ::= N O (L ρ) ((μ (X : T) L) ρ))
@@ -228,18 +169,21 @@
    -----------------------------------
    (⇓ (M_0 M_1 ...) ρ : V)]
 
-  [(⇓ M_0 ρ : (name f ((μ (X_f : T_f) (λ ([X_1 : T] ...) M)) ρ_1)))
+  [(⇓ M_0 ρ :
+      (name f ((μ (X_f : T_f) (λ ([X_1 : T] ...) M)) ρ_1)))
    (⇓ M_1 ρ : V_1)
    ...
    (⇓ M (ext ρ_1 (X_f f) (X_1 V_1) ...) : V)
    -----------------------------------------
    (⇓ (M_0 M_1 ...) ρ : V)])
 
-(test-equal (judgment-holds (⇓ fact-5 () : V) V) (term (120)))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Call-by-value PCF reduction semantics
+;; Call-by-name and by-value PCF reduction semantics
+
+(module+ test
+  (test-->> -->n (term fact-5) 120)
+  (test-->> -->v (term fact-5) 120))
 
 (define-extended-language PCFn PCF
   (E ::= hole
@@ -249,8 +193,6 @@
 
 (define -->n
   (context-closure r PCFn E))
-
-(test-->> -->n (term fact-5) 120)
 
 (define-extended-language PCFv PCF
   (E ::= hole
@@ -267,20 +209,22 @@
 (define -->v
   (context-closure v PCFv E))
 
-(test-->> -->v (term fact-5) 120)
-
 (define-term Ω
   ((μ (loop : (num -> num))
       (λ ([x : num])
 	(loop x)))
    0))
 
-(test-->> -->n (term ((λ ([x : num]) 0) Ω)) 0)
-(test-->> -->v #:cycles-ok (term ((λ ([x : num]) 0) Ω)))
+(module+ test
+  (test-->> -->n (term ((λ ([x : num]) 0) Ω)) 0)
+  (test-->> -->v #:cycles-ok (term ((λ ([x : num]) 0) Ω))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Explicit substitution reduction semantics
+
+(module+ test
+  (test-->> -->vρ (term (injρ fact-5)) 120))
 
 (define-extended-language PCFρ PCF⇓
   (C ::= V (M ρ) (if0 C C C) (C C ...))
@@ -301,7 +245,8 @@
 	(M (ext ρ (X V) ...))
 	β)
 
-   (--> ((name f ((μ (X_f : T_f) (λ ([X : T] ...) M)) ρ)) V ...)
+   (--> ((name f ((μ (X_f : T_f) (λ ([X : T] ...) M)) ρ))
+         V ...)
 	(M (ext ρ (X_f f) (X V) ...))
 	rec-β)
 
@@ -321,11 +266,12 @@
   injρ : M -> C
   [(injρ M) (M ())])
 
-(test-->> -->vρ (term (injρ fact-5)) 120)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Eval/Continue/Appy machine
+;; Eval/Continue/Apply machine
+
+(module+ test
+  (test-->> -->vς (term (injς fact-5)) 120))
 
 (define-extended-language PCFς PCFρ
   (F ::= (V ... [] C ...) (if0 [] C C))
@@ -369,11 +315,15 @@
   injς : M -> ς
   [(injς M) ((injρ M) ())])
 
-(test-->> -->vς (term (injς fact-5)) 120)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Relating -->vς and -->vρ
+
+(module+ test
+  (redex-check PCFς E (equal? (term E)
+                              (term (K->E (E->K E)))))
+  (redex-check PCFς K (equal? (term K)
+                              (term (E->K (K->E K))))))
 
 (define-metafunction PCFς
   K->E : K -> E
@@ -392,9 +342,6 @@
   [(E->K (V ... E C ...))
    (F ... (V ... [] C ...))
    (where (F ...) (E->K E))])
-
-;(redex-check PCFς E (equal? (term E) (term (K->E (E->K E)))))
-;(redex-check PCFς K (equal? (term K) (term (E->K (K->E K)))))
 
 (define-relation PCFς
   ≈ςρ ⊆ ς × C
@@ -418,7 +365,8 @@
    (inv ς_1 C)
    (where #t (≈ςρ ς C))
    (where ((any_rule ς_1))
-	  ,(apply-reduction-relation/tag-with-names -->vς (term ς)))
+	  ,(apply-reduction-relation/tag-with-names
+            -->vς (term ς)))
    (where (_ ... any_rule _ ...)
 	  ("ev-if" "ev-app" "co-if" "co-app" "halt"))]
   ;; ς -->vς ς′ by apply transition.
@@ -431,17 +379,29 @@
 	  ,(apply-reduction-relation -->vρ (term C)))]
   [(inv ς C) #f])
 
-(test-equal #t (term (inv (injς fact-5) (injρ fact-5))))
+(module+ test
+  (test-equal (term (inv (injς fact-5) (injρ fact-5)))
+              #t))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Eval/Continue/Apply machine with heap
+
+(module+ test
+  (test-->> -->vσ (term (injσ fact-5)) 120)
+  (test-->> (-->vσ/alloc alloc-gensym)
+            (term (injσ fact-5)) 120)
+  (test-->> (-->vσ/alloc alloc-nat)
+            (term (injσ fact-5)) 120))
 
 (define-extended-language PCFσ PCFς
   (ρ ::= .... ((X A) ...))
   (Σ ::= ((A V) ...))
   (A ::= any)
   (σ ::= (ς Σ) V))
+
+;; The -->vσ/Σ reduction relation is abstracted
+;; over a signature for heaps.
 
 (define-syntax-rule (-->vσ/Σ alloc ext-Σ lookup-Σ)
   (...
@@ -459,10 +419,15 @@
 	 (where (A ...) (alloc σ))
 	 β)
 
-    (--> (name σ ((((name f ((μ (X_f : T_f) (λ ([X : T] ...) M)) ρ)) V ...) K) Σ))
-	 (((M (ext ρ (X_f A_f) (X A) ...)) K) (ext-Σ Σ (A_f f) (A V) ...))
+    (--> (name σ ((((name f ((μ (X_f : T_f)
+            (λ ([X : T] ...) M)) ρ)) V ...) K) Σ))
+	 (((M (ext ρ (X_f A_f) (X A) ...)) K)
+          (ext-Σ Σ (A_f f) (A V) ...))
 	 (where (A_f A ...) (alloc σ))
 	 rec-β))))
+
+;; The -->vσ/alloc reduction relation is abstracted
+;; only over an allocation function.
 
 (define-syntax-rule
   (-->vσ/alloc alloc)
@@ -486,8 +451,6 @@
   injσ : M -> σ
   [(injσ M) ((injς M) ())])
 
-(test-->> -->vσ (term (injσ fact-5)) 120)
-
 (define-metafunction PCFσ
   alloc-gensym : ((C K) Σ) -> (A ...)
   [(alloc-gensym ((((M ρ) V ...) K) Σ))
@@ -500,17 +463,14 @@
       (build-list (length (term (formals M)))
 		  (λ (i) (+ i n))))])
 
-(test-->> (-->vσ/alloc alloc-gensym)
-	  (term (injσ fact-5))
-	  120)
-
-(test-->> (-->vσ/alloc alloc-nat)
-	  (term (injσ fact-5))
-	  120)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Relating -->vσ and -->vς
+
+(module+ test
+  (test-equal (term (inv-σς (injσ fact-5) (injς fact-5)))
+              #t))
 
 (define-relation PCFσ
   ≈σς ⊆ σ × ς
@@ -571,9 +531,6 @@
    (where (ς_1) ,(apply-reduction-relation -->vς (term ς)))]
   [(inv-σς σ ς) #f])
 
-
-(test-equal #t (term (inv-σς (injσ fact-5) (injς fact-5))))
-
 ;; This diverges
 #;
 (test-equal #t
@@ -584,18 +541,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Heap allocated continuations
 
+(module+ test
+  (test-->> -->vσ* (term (injσ fact-5)) 120))
+
 (define-extended-language PCFσ* PCFσ
   (K ::= () (F A))
   (Σ ::= ((A U) ...))
   (U ::= V K))
 
+;; Alloc a pointer for a frame
 (define-metafunction/extension alloc PCFσ*
   alloc* : ((C K) Σ) -> (A ...)
   [(alloc* (((if0 S_0 C_1 C_2) K) Σ))
    (((if0 [] C_1 C_2) ,(gensym 'if0)))]
   [(alloc* (((V ... S C ...) K) Σ))
    (((V ... [] C ...) ,(gensym 'app)))])
-
 
 (define-syntax-rule
   (-->vσ*/Σ alloc* ext-Σ lookup-Σ)
@@ -631,11 +591,14 @@
 
 (define -->vσ* (-->vσ*/alloc alloc*))
 
-(test-->> -->vσ* (term (injσ fact-5)) 120)
-
+;; Exercise: formulate and test an invariant between
+;; -->vσ* and -->vσ.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set-based heap
+
+(module+ test
+  (test-->> -->vσ∘ (term (injσ∘ fact-5)) 120))
 
 (define-extended-language PCFσ∘ PCFσ*
   (Σ ::= any))
@@ -654,10 +617,15 @@
   injσ∘ : M -> σ
   [(injσ∘ M) ((injς M) Σ∅)])
 
-(test-->> -->vσ∘ (term (injσ∘ fact-5)) 120)
+;; Exercise: formulate and test an invariant between
+;; -->vσ* and -->vσ∘.
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; AAM
+
+(module+ test
+  (test-->> -->vσ^ (term (injσ∘ fact-5)) 1 'num))
 
 (define-extended-language PCFσ^ PCFσ∘
   (N ::= .... num))
@@ -681,25 +649,6 @@
   (extend-reduction-relation
    (-->vσ∘/Σ alloc^ ext-Σ lookup-Σ)
    PCFσ^
-
-   ;; BUG WORKAROUND: ρ-x, co-if, & co-app
-   ;; repeated here to work around
-   ;; http://bugs.racket-lang.org/query/?cmd=view&pr=14660
-   (--> (((X ρ) K) Σ) ((V K) Σ)
-	(judgment-holds (lookup ρ X A))
-	(judgment-holds (lookup-Σ Σ A V))
-	ρ-x)
-   ;; Continue
-   (--> ((V ((if0 [] C_1 C_2) A)) Σ)
-	(((if0 V C_1 C_2) K) Σ)
-	(judgment-holds (lookup-Σ Σ A K))
-	co-if)
-
-   (--> ((V ((V_0 ... [] C_0 ...) A)) Σ)
-	(((V_0 ... V C_0 ...) K) Σ)
-	(judgment-holds (lookup-Σ Σ A K))
-	co-app)
-
    (--> (((O N ...) K) Σ)
 	((N_1 K) Σ)
 	(judgment-holds (δ^ (O N ...) N_1))
@@ -711,11 +660,163 @@
 	((C_2 K) Σ)
 	if0-num-f)))
 
+;; ⊑
+
+(define-relation PCFσ^
+  ⊑σ ⊆ σ × σ
+  ; (side-condition σ_1 (redex-match? PCFσ∘ σ (term σ_1)))
+  [(⊑σ σ σ)]
+  [(⊑σ V_1 V_2)
+   (⊑V V_1 V_2)]  
+  [(⊑σ (ς_1 Σ_1) (ς_2 Σ_2))
+   (⊑ς ς_1 ς_2)
+   (⊑Σ Σ_1 Σ_2)])
+
+(define-relation PCFσ^
+  ⊑Σ ⊆ Σ × Σ
+  [(⊑Σ Σ_1 Σ_2)
+   (where #t ,(⊑Σ* (term Σ_1) (term Σ_2)))])
+
+(define (⊑Σ* Σ Σ^)
+  (for/and ([(a us) (in-hash Σ)])
+    (for/and ([u (in-set us)])
+      (for/or ([(a^ us^) (in-hash Σ^)])
+        (for/or ([u^ (in-set us^)])
+          (and (term (⊑A ,a ,a^))
+               (term (⊑U ,u ,u^))))))))
+        
+(define-relation PCFσ^
+  ⊑U ⊆ U × U
+  [(⊑U V_1 V_2)
+   (⊑V V_1 V_2)]
+  [(⊑U K_1 K_2)
+   (⊑K K_1 K_2)])
+  
+(define-relation PCFσ^
+  ⊑ς ⊆ ς × ς
+  [(⊑ς V_1 V_2)
+   (⊑V V_1 V_2)]
+  [(⊑ς (C_1 K_1) (C_2 K_2))
+   (⊑C C_1 C_2)
+   (⊑K K_1 K_2)])
+
+(define-relation PCFσ^
+  ⊑C ⊆ C × C
+  [(⊑C V_1 V_2)
+   (⊑V V_1 V_2)]
+  [(⊑C (M_1 ρ_1) (M_2 ρ_2))
+   (⊑M M_1 M_2)
+   (⊑ρ ρ_1 ρ_2)]
+  [(⊑C (if0 C_1 C_2 C_3)
+       (if0 C_4 C_5 C_6))
+   (⊑C C_1 C_4)
+   (⊑C C_2 C_5)
+   (⊑C C_3 C_6)]
+  [(⊑C (C_1 C_2 ..._1)
+       (C_3 C_4 ..._1))
+   (⊑C C_1 C_3)
+   (⊑C C_2 C_4)
+   ...])
+
+
+;; for every x ∈ dom(ρ_1)
+;; if ρ_1(x) = a then
+;; ρ_2(x) = a^ and a ⊑ a^ 
+(define-relation PCFσ^
+  ⊑ρ ⊆ ρ × ρ
+  [(⊑ρ () ρ)]
+  [(⊑ρ ((X_0 A_0) (X_1 A_1) ...)
+       (name ρ (_ ... (X_0 A_2) _ ...)))
+   (⊑A A_0 A_2)
+   (⊑ρ ((X_1 A_1) ...) ρ)])
+
+(module+ test
+  (test-equal (term (⊑ρ () ())) #t)
+  (test-equal (term (⊑ρ () ((x x)))) #t)
+  (test-equal (term (⊑ρ ((x (x asdf))) ((x x)))) #t)
+  (test-equal (term (⊑ρ ((x (x asdf))) ((x x)))) #t)
+
+  #; ;; alloc* and alloc^ are not total
+  (redex-check PCFσ^ (name σ ((C K) Σ))
+               (term (⊑A (alloc* σ) (alloc^ σ)))))
+
+
+(define-relation PCFσ^
+  ⊑K ⊆ K × K
+  [(⊑K () ())]
+  [(⊑K (F_1 A_1) (F_2 A_2))
+   (⊑F F_1 F_2)
+   (⊑A A_1 A_2)])
+
+(define-relation PCFσ^
+  ⊑A ⊆ A × A
+  [(⊑A (X any) X)]
+  [(⊑A (F_1 any) F_2)
+   (⊑F F_1 F_2)])
+
+(define-relation PCFσ^
+  ⊑F ⊆ F × F
+  [(⊑F (V_1 ..._1 [] C_1 ..._2)
+       (V_2 ..._1 [] C_2 ..._2))
+   (⊑V V_1 V_2)
+   ...
+   (⊑C C_1 C_2)
+   ...]
+  [(⊑F (if0 [] C_1 C_2)
+       (if0 [] C_3 C_4))
+   (⊑C C_1 C_3)
+   (⊑C C_2 C_4)])
+
+(module+ test
+  (test-equal (term (⊑F (1 [] 2) (num [] num))) #t))
+    
+(define-relation PCFσ^
+  ⊑V ⊆ V × V
+  [(⊑V N num)]
+  [(⊑V N N)]
+  [(⊑V O O)]
+  [(⊑V (L ρ_1) (L ρ_2))
+   (⊑ρ ρ_1 ρ_2)]
+  
+  [(⊑V ((μ (X : T) L) ρ_1)
+       ((μ (X : T) L) ρ_2))
+   (⊑ρ ρ_1 ρ_2)])
+       
+  
+
+  
+
+(define-relation PCFσ^
+  ⊑M ⊆ M × M
+  [(⊑M M M)])
+   
+
+;; HERE
+(apply-reduction-relation -->vσ∘ (term (injσ∘ fact-5)))
+(apply-reduction-relation -->vσ^ (term (injσ∘ fact-5)))
+
+;; 21 font size
+;; column size of 60
+
+(define-metafunction PCFσ^
+  inv-⊑ : σ σ -> boolean
+  ;; σ -->vσ∘ σ′
+  [(inv-⊑ V V_^)
+   (⊑V V V_^)]
+  [(inv-⊑ σ σ_^)
+   (inv-⊑ σ_1 σ_^′) 
+   (where (σ_1) ,(apply-reduction-relation -->vσ∘ (term σ)))
+   (where (σ_^1 ... σ_^′ σ_^2 ...)
+          ,(apply-reduction-relation -->vσ^ (term σ_^)))
+   (where #t (⊑σ σ_1 σ_^′))]
+  [(inv-⊑ σ σ_^)
+   #f
+   (where #t ,(begin (display (term σ))
+                     (display (term σ_^))
+                     #t))])
 
 (current-cache-all? #t)
 ;(apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
-(test-->> -->vσ^ (term (injσ∘ fact-5)) 1 'num)
-
 ;(define -->vσ*^ (-->vσ*^/alloc alloc*^))
 
 
