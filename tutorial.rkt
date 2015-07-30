@@ -464,7 +464,6 @@
 		  (λ (i) (+ i n))))])
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Relating -->vσ and -->vς
 
@@ -660,7 +659,24 @@
 	((C_2 K) Σ)
 	if0-num-f)))
 
-;; ⊑
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Formalizing approximation
+
+(module+ test
+  (test-true (term (inv-⊑ (injσ∘ fact-5)
+                          (injσ∘ fact-5)))))
+
+(define-relation PCFσ^
+  inv-⊑ ⊆ σ × σ
+  [(inv-⊑ V V_^)
+   (⊑V V V_^)]
+  [(inv-⊑ σ σ_^)
+   (inv-⊑ σ_1 σ_^′)
+   (where (σ_1) ,(apply-reduction-relation -->vσ∘ (term σ)))
+   (where (σ_^1 ... σ_^′ σ_^2 ...)
+          ,(apply-reduction-relation -->vσ^ (term σ_^)))
+   (where #t (⊑σ σ_1 σ_^′))])
 
 (define-relation PCFσ^
   ⊑σ ⊆ σ × σ
@@ -672,9 +688,24 @@
    (⊑ς ς_1 ς_2)
    (⊑Σ Σ_1 Σ_2)])
 
+(module+ test
+  (test-true  (term (⊑Σ Σ∅ Σ∅)))
+  (test-true  (term (⊑Σ ,(hash '(x x0) (set 1))
+                        ,(hash 'x      (set 1)))))
+  (test-true  (term (⊑Σ ,(hash '(x x0) (set 1)
+                               '(x x1) (set 2))
+                        ,(hash 'x      (set 1 2)))))
+  (test-true  (term (⊑Σ ,(hash '(x x0) (set 1)
+                               '(x x1) (set 2))
+                        ,(hash 'x      (set 'num)))))
+  (test-false (term (⊑Σ ,(hash '(x x0) (set 1)
+                               '(x x1) (set 2))
+                        ,(hash 'x (set 1))))))
+
 (define-relation PCFσ^
   ⊑Σ ⊆ Σ × Σ
   [(⊑Σ Σ_1 Σ_2)
+   #;(where #t #f)
    (where #t ,(⊑Σ* (term Σ_1) (term Σ_2)))])
 
 (define (⊑Σ* Σ Σ^)
@@ -684,7 +715,13 @@
         (for/or ([u^ (in-set us^)])
           (and (term (⊑A ,a ,a^))
                (term (⊑U ,u ,u^))))))))
-        
+
+(define-relation PCFσ^
+  ⊑A ⊆ A × A
+  [(⊑A (X any) X)]
+  [(⊑A (F_1 any) F_2)
+   (⊑F F_1 F_2)])
+
 (define-relation PCFσ^
   ⊑U ⊆ U × U
   [(⊑U V_1 V_2)
@@ -718,6 +755,9 @@
    (⊑C C_2 C_4)
    ...])
 
+(define-relation PCFσ^
+  ⊑M ⊆ M × M
+  [(⊑M M M)])
 
 ;; for every x ∈ dom(ρ_1)
 ;; if ρ_1(x) = a then
@@ -734,12 +774,7 @@
   (test-equal (term (⊑ρ () ())) #t)
   (test-equal (term (⊑ρ () ((x x)))) #t)
   (test-equal (term (⊑ρ ((x (x asdf))) ((x x)))) #t)
-  (test-equal (term (⊑ρ ((x (x asdf))) ((x x)))) #t)
-
-  #; ;; alloc* and alloc^ are not total
-  (redex-check PCFσ^ (name σ ((C K) Σ))
-               (term (⊑A (alloc* σ) (alloc^ σ)))))
-
+  (test-equal (term (⊑ρ ((x (x asdf))) ((x x)))) #t))
 
 (define-relation PCFσ^
   ⊑K ⊆ K × K
@@ -747,12 +782,6 @@
   [(⊑K (F_1 A_1) (F_2 A_2))
    (⊑F F_1 F_2)
    (⊑A A_1 A_2)])
-
-(define-relation PCFσ^
-  ⊑A ⊆ A × A
-  [(⊑A (X any) X)]
-  [(⊑A (F_1 any) F_2)
-   (⊑F F_1 F_2)])
 
 (define-relation PCFσ^
   ⊑F ⊆ F × F
@@ -780,45 +809,11 @@
   
   [(⊑V ((μ (X : T) L) ρ_1)
        ((μ (X : T) L) ρ_2))
-   (⊑ρ ρ_1 ρ_2)])
-       
-  
-
-  
-
-(define-relation PCFσ^
-  ⊑M ⊆ M × M
-  [(⊑M M M)])
+   (⊑ρ ρ_1 ρ_2)])      
    
-
-;; HERE
-(apply-reduction-relation -->vσ∘ (term (injσ∘ fact-5)))
-(apply-reduction-relation -->vσ^ (term (injσ∘ fact-5)))
-
-;; 21 font size
-;; column size of 60
-
-(define-metafunction PCFσ^
-  inv-⊑ : σ σ -> boolean
-  ;; σ -->vσ∘ σ′
-  [(inv-⊑ V V_^)
-   (⊑V V V_^)]
-  [(inv-⊑ σ σ_^)
-   (inv-⊑ σ_1 σ_^′) 
-   (where (σ_1) ,(apply-reduction-relation -->vσ∘ (term σ)))
-   (where (σ_^1 ... σ_^′ σ_^2 ...)
-          ,(apply-reduction-relation -->vσ^ (term σ_^)))
-   (where #t (⊑σ σ_1 σ_^′))]
-  [(inv-⊑ σ σ_^)
-   #f
-   (where #t ,(begin (display (term σ))
-                     (display (term σ_^))
-                     #t))])
+;; More tests
 
 (current-cache-all? #t)
-;(apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
-;(define -->vσ*^ (-->vσ*^/alloc alloc*^))
-
 
 (test-->> -->vσ^
 	  (term (injσ∘ ((λ ([f : (num -> num)])
@@ -839,12 +834,17 @@
 		 ((λ ([_ : num]) (f 0)) (f 1)))
 	       (λ ([z : num]) Ω)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Calculating properties
 
+;; step : red (setof term) -> (setof term)
 (define (step r ts)
   (list->set (for/fold ([a '()])
-	       ([t (in-set ts)])
-	       (append (apply-reduction-relation r t) a))))
+                       ([t (in-set ts)])
+               (append (apply-reduction-relation r t) a))))
 
+;; reach : red term -> (setof term)
+;; Set of terms reachable by refl, trans closure of r from t
 (define (reach r t)
   (let loop ([accum (set)]
 	     [front (set t)])
@@ -854,45 +854,18 @@
 	  (loop (set-union accum front)
 		(set-subtract n accum))))))
 
+;; reach-filter : red term (term -> bool) -> (setof term)
+;; Set of reachable terms satisfying given predicate
 (define (reach-filter r t pred)
   (for/set ([t (in-set (reach r t))]
 	    #:when (pred t))
     t))
 
+;; irreducible : red term -> (setof term)
+;; Like apply-reduction-relation*
 (define (irreducible r t)
   (reach-filter r t
     (λ (t) (empty? (apply-reduction-relation r t)))))
 
 
-#|
-(apply-reduction-relation* -->vσ^ (term (injσ∘ Ω)))
 
-(apply-reduction-relation*
- -->vσ^
- (term (injσ∘ (if0 (add1 5) 2 3))))
-
-(apply-reduction-relation*
- -->vσ^
- (term (injσ∘ ((μ (f : (num -> num))
-		  (λ ([z : num])
-		    (if0 z
-			 0
-			 (f (sub1 z)))))
-	       10))))
-|#
-
-
-
-;(apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
-
-
-#;
-(test-->> -->vσ*^ (term (injσ (if0 (add1 0) 1 2)))
-	  1 2)
-
-#|
-(define -->vσ*^
-  (extend-reduction-relation
-   (-->vσ*/alloc alloc*)
-   PCFσ*^
-  |#
