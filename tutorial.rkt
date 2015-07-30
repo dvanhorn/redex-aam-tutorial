@@ -858,5 +858,6 @@
     (λ (t) (empty? (apply-reduction-relation r t)))))
 
 
+#;
 (reach-filter -->vσ^ (term (injσ∘ dead-code))
               (redex-match? PCFσ^ (((0 ρ) F) Σ)))
