@@ -7,11 +7,11 @@
 
 ;; Shorthands to help keep code narrow.
 (define-syntax-rule
-  (test-true e)
+  (test-#t e)
   (test-equal e #t))
 
 (define-syntax-rule
-  (test-false e)
+  (test-#f e)
   (test-equal e #f))
 
 (define-language REDEX)
@@ -43,9 +43,9 @@
 ;; lookup-Σ : Look up member of set heap
 ;; (lookup-Σ Σ k v) iff v ∈ Σ(k)
 (module+ test
-  (test-true
+  (test-#t
    (judgment-holds (lookup-Σ (ext-Σ Σ∅ (x 1)) x 1)))
-  (test-false
+  (test-#f
    (judgment-holds (lookup-Σ Σ∅ x 1))))
 
 (define-judgment-form REDEX
@@ -82,11 +82,11 @@
 ;; Associations model a map : A ↦ B
 
 (module+ test
-  (test-true
+  (test-#t
    (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 1)))
-  (test-false
+  (test-#f
    (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 2)))
-  (test-true
+  (test-#t
    (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 3))))
 
 (define-judgment-form REDEX

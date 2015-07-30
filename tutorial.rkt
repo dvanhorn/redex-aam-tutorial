@@ -31,7 +31,7 @@
    5))
 
 (module+ test
-  (test-equal (redex-match? PCF M (term fact-5)) true))
+  (test-#t (redex-match? PCF M (term fact-5))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -319,6 +319,44 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Relating -->vς and -->vρ
 
+(module+ test  
+  (test-#t (term (inv (injς fact-5) (injρ fact-5)))))
+
+(define-relation PCFς
+  ≈ςρ ⊆ ς × C
+  [(≈ςρ V V)]
+  [(≈ςρ (C_0 K) C_1)
+   (where C_1 (in-hole (K->E K) C_0))])
+
+;; If (≈ςρ ς C), then either:
+;; - ς = C = V for some V,
+;; - ς -->vς ς′ by an eval, continue, or halt transition
+;;   and (≈ςρ ς′ C)
+;; - ς -->vς ς′ by an apply transition,
+;;   C -->vρ C′, and (≈ςρ ς′ C′)
+
+;; Check above claim holds at each step of reduction
+(define-relation PCFς
+  inv ⊆ ς × C
+  [(inv V C) (≈ςρ V C)]
+  ;; ς -->vς ς′ by eval, continue, or halt.
+  [(inv ς C)
+   (inv ς_1 C)
+   (≈ςρ ς C)
+   (where ((any_rule ς_1))
+	  ,(apply-reduction-relation/tag-with-names
+            -->vς (term ς)))
+   (where (_ ... any_rule _ ...)
+	  ("ev-if" "ev-app" "co-if" "co-app" "halt"))]
+  ;; ς -->vς ς′ by apply transition.
+  [(inv ς C)
+   (inv ς_1 C_1)
+   (≈ςρ ς C)
+   (where (ς_1)
+	  ,(apply-reduction-relation -->vς (term ς)))
+   (where (C_1)
+	  ,(apply-reduction-relation -->vρ (term C)))])
+
 (module+ test
   (redex-check PCFς E (equal? (term E)
                               (term (K->E (E->K E)))))
@@ -342,46 +380,6 @@
   [(E->K (V ... E C ...))
    (F ... (V ... [] C ...))
    (where (F ...) (E->K E))])
-
-(define-relation PCFς
-  ≈ςρ ⊆ ς × C
-  [(≈ςρ V V)]
-  [(≈ςρ (C_0 K) C_1)
-   (where C_1 (in-hole (K->E K) C_0))])
-
-;; If (≈ςρ ς C), then either:
-;; - ς = C = V for some V,
-;; - ς -->vς ς′ by an eval, continute, or halt transition
-;;   and (≈ςρ ς′ C)
-;; - ς -->vς ς′ by an apply transition,
-;;   C -->vρ C′, and (≈ςρ ς′ C′)
-
-;; Check above claim holds at each step of reduction
-(define-metafunction PCFς
-  inv : ς C -> boolean
-  [(inv V C) (≈ςρ V C)]
-  ;; ς -->vς ς′ by eval, continue, or halt.
-  [(inv ς C)
-   (inv ς_1 C)
-   (where #t (≈ςρ ς C))
-   (where ((any_rule ς_1))
-	  ,(apply-reduction-relation/tag-with-names
-            -->vς (term ς)))
-   (where (_ ... any_rule _ ...)
-	  ("ev-if" "ev-app" "co-if" "co-app" "halt"))]
-  ;; ς -->vς ς′ by apply transition.
-  [(inv ς C)
-   (inv ς_1 C_1)
-   (where #t (≈ςρ ς C))
-   (where (ς_1)
-	  ,(apply-reduction-relation -->vς (term ς)))
-   (where (C_1)
-	  ,(apply-reduction-relation -->vρ (term C)))]
-  [(inv ς C) #f])
-
-(module+ test
-  (test-equal (term (inv (injς fact-5) (injρ fact-5)))
-              #t))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -468,13 +466,31 @@
 ;; Relating -->vσ and -->vς
 
 (module+ test
-  (test-equal (term (inv-σς (injσ fact-5) (injς fact-5)))
-              #t))
+  (test-#t (term (inv-σς (injσ fact-5) (injς fact-5)))))
 
 (define-relation PCFσ
   ≈σς ⊆ σ × ς
   [(≈σς σ ς)
    (where ς (σ->ς σ))])
+
+;; If (≈σς σ ς), then either:
+;; - if σ = (V Σ) then ς = V′ and (≈σς (V Σ) V′),
+;; - if σ -->vσ σ′ then
+;;   ς -->vς ς′, and (≈ςρ σ′ ς′)
+
+(define-relation PCFσ
+  inv-σς ⊆ σ × ς
+  [(inv-σς (V Σ) V_1)
+   (≈σς (V Σ) V_1)]
+  ;; ς -->vσ ς′
+  [(inv-σς σ ς)
+   (inv-σς σ_1 ς_1)
+   (≈σς σ ς)
+   (where (σ_1)
+          ,(apply-reduction-relation -->vσ (term σ)))
+   (where (ς_1)
+          ,(apply-reduction-relation -->vς (term ς)))])
+
 
 (define-metafunction PCFσ
   σ->ς : σ -> ς
@@ -510,25 +526,6 @@
    (if0 [] (CΣ->C C_1 Σ) (CΣ->C C_2 Σ))]
   [(FΣ->F (V ... [] C ...) Σ)
    ((CΣ->C V Σ) ... [] (CΣ->C C Σ) ...)])
-
-
-;; If (≈σς σ ς), then either:
-;; - if σ = (V Σ) then ς = V′ and (≈σς (V Σ) V′),
-;; - if σ -->vσ σ′ then
-;;   ς -->vς ς′, and (≈ςρ σ′ ς′)
-
-;; Check above claim holds at each step of reduction
-(define-metafunction PCFσ
-  inv-σς : σ ς -> boolean
-  [(inv-σς (V Σ) V_1)
-   (≈σς (V Σ) V_1)]
-  ;; ς -->vσ ς′
-  [(inv-σς σ ς)
-   (inv-σς σ_1 ς_1)
-   (where #t (≈σς σ ς))
-   (where (σ_1) ,(apply-reduction-relation -->vσ (term σ)))
-   (where (ς_1) ,(apply-reduction-relation -->vς (term ς)))]
-  [(inv-σς σ ς) #f])
 
 ;; This diverges
 #;
@@ -664,8 +661,8 @@
 ;; Formalizing approximation
 
 (module+ test
-  (test-true (term (inv-⊑ (injσ∘ fact-5)
-                          (injσ∘ fact-5)))))
+  (test-#t (term (inv-⊑ (injσ∘ fact-5)
+                        (injσ∘ fact-5)))))
 
 (define-relation PCFσ^
   inv-⊑ ⊆ σ × σ
@@ -689,18 +686,18 @@
    (⊑Σ Σ_1 Σ_2)])
 
 (module+ test
-  (test-true  (term (⊑Σ Σ∅ Σ∅)))
-  (test-true  (term (⊑Σ ,(hash '(x x0) (set 1))
-                        ,(hash 'x      (set 1)))))
-  (test-true  (term (⊑Σ ,(hash '(x x0) (set 1)
-                               '(x x1) (set 2))
-                        ,(hash 'x      (set 1 2)))))
-  (test-true  (term (⊑Σ ,(hash '(x x0) (set 1)
-                               '(x x1) (set 2))
-                        ,(hash 'x      (set 'num)))))
-  (test-false (term (⊑Σ ,(hash '(x x0) (set 1)
-                               '(x x1) (set 2))
-                        ,(hash 'x (set 1))))))
+  (test-#t (term (⊑Σ Σ∅ Σ∅)))
+  (test-#t (term (⊑Σ ,(hash '(x x0) (set 1))
+                     ,(hash 'x      (set 1)))))
+  (test-#t (term (⊑Σ ,(hash '(x x0) (set 1)
+                            '(x x1) (set 2))
+                     ,(hash 'x      (set 1 2)))))
+  (test-#t (term (⊑Σ ,(hash '(x x0) (set 1)
+                            '(x x1) (set 2))
+                     ,(hash 'x      (set 'num)))))
+  (test-#f (term (⊑Σ ,(hash '(x x0) (set 1)
+                            '(x x1) (set 2))
+                     ,(hash 'x (set 1))))))
 
 (define-relation PCFσ^
   ⊑Σ ⊆ Σ × Σ
@@ -771,10 +768,10 @@
    (⊑ρ ((X_1 A_1) ...) ρ)])
 
 (module+ test
-  (test-equal (term (⊑ρ () ())) #t)
-  (test-equal (term (⊑ρ () ((x x)))) #t)
-  (test-equal (term (⊑ρ ((x (x asdf))) ((x x)))) #t)
-  (test-equal (term (⊑ρ ((x (x asdf))) ((x x)))) #t))
+  (test-#t (term (⊑ρ () ())))
+  (test-#t (term (⊑ρ () ((x x)))))
+  (test-#t (term (⊑ρ ((x (x asdf))) ((x x)))))
+  (test-#t (term (⊑ρ ((x (x asdf))) ((x x))))))
 
 (define-relation PCFσ^
   ⊑K ⊆ K × K
@@ -797,7 +794,7 @@
    (⊑C C_2 C_4)])
 
 (module+ test
-  (test-equal (term (⊑F (1 [] 2) (num [] num))) #t))
+  (test-#t (term (⊑F (1 [] 2) (num [] num)))))
     
 (define-relation PCFσ^
   ⊑V ⊆ V × V
@@ -805,8 +802,7 @@
   [(⊑V N N)]
   [(⊑V O O)]
   [(⊑V (L ρ_1) (L ρ_2))
-   (⊑ρ ρ_1 ρ_2)]
-  
+   (⊑ρ ρ_1 ρ_2)]  
   [(⊑V ((μ (X : T) L) ρ_1)
        ((μ (X : T) L) ρ_2))
    (⊑ρ ρ_1 ρ_2)])      
@@ -820,12 +816,6 @@
 			  ((λ ([_ : num]) (f 0)) (f 1)))
 			(λ ([z : num]) z))))
 	  0 1)
-
-(define-term dead-code
-  ((λ ([f : (num -> num)])
-     ((λ ([_ : num]) (f 0)) (f 1)))
-   (λ ([z : num]) Ω)))
-
 
 #;
 (traces
@@ -868,4 +858,5 @@
     (λ (t) (empty? (apply-reduction-relation r t)))))
 
 
-
+(reach-filter -->vσ^ (term (injσ∘ dead-code))
+              (redex-match? PCFσ^ (((0 ρ) F) Σ)))
