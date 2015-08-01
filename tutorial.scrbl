@@ -1093,6 +1093,10 @@ before reducing:
 (apply-reduction-relation* -->vρ (term (injρ fact-5)))
 ]
 
+One of the nice properties of this explicit substitution formulation
+is that we don't need a substitution metafunction, which is good since
+substitution is both tedious to write and easy to get wrong.
+
 @subsection{Eval/Continue/Apply machine}
 
 Explicit substitutions explicate the handling of variable bindings and
@@ -1981,10 +1985,10 @@ terminate; thus the analysis proves non-termination for this program:
 (apply-reduction-relation* -->vσ^ (term (injσ∘ Ω)))
 ]
 
-@bold{Exercise}: develop an "approximation" relation between concrete
-states (@racket[]) and abstract states (@racket[]) and then formulate
-and test an invariant that states any concrete reduction implies the
-existence of a abstract reduction.
+@bold{Exercise}: develop an ``approximation'' relation between
+concrete states (@racket[PCFσ∘]) and abstract states (@racket[PCFσ^])
+and then formulate and test an invariant that states any concrete
+reduction implies the existence of a abstract reduction.
 
 @subsection{Discovering properties}
 

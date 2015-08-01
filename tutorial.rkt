@@ -702,7 +702,6 @@
 (define-relation PCFσ^
   ⊑Σ ⊆ Σ × Σ
   [(⊑Σ Σ_1 Σ_2)
-   #;(where #t #f)
    (where #t ,(⊑Σ* (term Σ_1) (term Σ_2)))])
 
 (define (⊑Σ* Σ Σ^)
