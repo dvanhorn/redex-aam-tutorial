@@ -1,8 +1,13 @@
 #lang scribble/manual
-@(require scriblib/autobib)
+@(require scriblib/autobib
+	  "ex.rkt")
 @(require scribble/lp-include
+	  scribble/core
+          scribble/html-properties
+	  racket/date
           (for-label (except-in racket _ add1 sub1 ... λ + * -> string any) 
                      (except-in redex I O)))
+
 
 @(define-cite ~cite citet generate-bibliography)
 
@@ -67,15 +72,47 @@
     #:title "Abstracting Abstract Machines"
     #:author (authors (author-name "David" "Van Horn")
 		      "Matthew Might")
-    #:location "ICFP"
-    #:date "2010"))
+    #:location (proceedings-location "The 15th ACM SIGPLAN International Conference on Functional Programming (ICFP'10)")
+    #:date "2010" ; September
+    #:url "http://arxiv.org/abs/1007.4446"
+    ))
+
+@(define bib:scv
+  (make-bib
+    #:title "Soft Contract Verification"
+    #:author (authors "Phuc C. Nguyen"
+		      "Sam Tobin-Hochstadt"
+		      (author-name "David" "Van Horn"))
+    #:location (proceedings-location "The ACM SIGPLAN International Conference on Functional Programming (ICFP'14)")
+    #:url "http://arxiv.org/abs/1307.6239"
+    #:date "2014"))
 
 
+
+@elem[#:style 
+      (style #f (list (alt-tag "a") 
+		      (attributes 
+		       '((href . "https://github.com/dvanhorn/redex-aam-tutorial/")))))
+      @elem[#:style
+	    (style #f
+	      (list (alt-tag "img")
+		    (attributes 
+		     '((style . "position: absolute; top: 0; right: 0; border: 0;")
+		       (src . "https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67")
+		       (alt . "Fork me on GitHub")
+		       (data-canonical-src . "https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png")))))]]
+ 
 @title{An Introduction to Redex with Abstracting Abstract Machines}
 
 @author+email["David Van Horn" "dvanhorn@cs.umd.edu"]
 
+Last updated: @date->string[(current-date)]
+
 @section{Introduction}
+
+@margin-note{This is a ``living'' artifact: please submit bug reports
+and pull requests whenever you spot problems in this document.
+@url{https://github.com/dvanhorn/redex-aam-tutorial/}}
 
 This article provides a brief introduction to the Redex programming
 language for semantic modelling.  It does so by developing several
@@ -1331,10 +1368,11 @@ previous semantics and computes the correct result for
 
 It's easy to see that from an initial configuration @racket[-->vσ]
 reduction operates in lock-step with @racket[-->vς] reduction (modulo
-the possibility of a final @racket[discard-Σ] step).
+the possibility of a final @racket[discard-Σ] step and some
+``stuttering'' steps).
 
-@bold{Exercise}: formulate and test an invariant between 
-@racket[-->vσ] and @racket[-->vς].
+@exercise["asdf"]{Formulate and test an equivalence invariant between
+@racket[-->vσ] and @racket[-->vς].}
 
 @subsection{Abstracting over @racket[alloc]}
 
@@ -1582,6 +1620,9 @@ And now we can verify the running example yet again:
 It's straightforward to observe that @racket[-->vσ*] and
 @racket[-->vσ] operate in lock-step starting the same initial
 configuration.
+
+@exercise["eqv-store-ptr"]{Formulate and test an equivalence invariant
+between @racket[-->vσ*] and @racket[-->vσ].}
 
 @subsection{A look back; a look forward}
 
@@ -1985,15 +2026,153 @@ terminate; thus the analysis proves non-termination for this program:
 (apply-reduction-relation* -->vσ^ (term (injσ∘ Ω)))
 ]
 
-@bold{Exercise}: develop an ``approximation'' relation between
+@exercise["approx"]{Develop an ``approximation'' relation between
 concrete states (@racket[PCFσ∘]) and abstract states (@racket[PCFσ^])
 and then formulate and test an invariant that states any concrete
-reduction implies the existence of a abstract reduction.
+reduction implies the existence of a abstract reduction.}
+
+@subsection{Soundness}
+
+We have aimed to construct a new semantics (@racket[-->vσ^]) that is a
+@emph{sound} and @emph{computable} approximation of the original
+abstract machine semantics (@racket[-->vσ∘]).  The computability
+argument is simple: starting from an initial configuration, there are
+only a finite set of states that can be reached.  You can check this
+yourself by going through each category of the state space to observe
+that there are only a finite number of elements, assuming the
+@racket[alloc^] function only returns elements drawn from a finite
+set.
+
+The soundness argument is also simple: every time the concrete machine
+@racket[-->vσ∘] takes a step from one state @racket[_σ_1] to
+@racket[_σ_2], then starting from a corresponding abstract state that
+approximates @racket[_σ_1], the @racket[-->vσ^] machine steps to a
+state that approximates @racket[_σ_2].  It may also step to other
+states---such is the nature of approximation---but at least one of the
+successor states will be an approximation of the ``real'' successor.
+Consquently, while the concrete machines reduction may produce an
+infinite trace of states, that infinite trace will follow a path
+through the finite graph of the abstract reduction graph.
+
+We can formalize this observation by first defining what it means for
+a concrete state to be approximated by an abstract one.  We do so with
+a relation, @racket[⊑σ], which relates concrete and abstract states:
+
+@interaction[#:eval redex-eval
+(define-relation PCFσ^
+  ⊑σ ⊆ σ × σ
+  [(⊑σ V_1 V_2)
+   (⊑V V_1 V_2)]  
+  [(⊑σ (ς_1 Σ_1) (ς_2 Σ_2))
+   (⊑ς ς_1 ς_2)
+   (⊑Σ Σ_1 Σ_2)])
+]
+
+As you can see, this depends on notions of approximation for each
+sub-component of a machine state.  The remaining definitions are
+straightforward by structural recursion, with the exception of 
+values, addresses, environments, and stores.
+
+Approximation for values is simple; the interesting case is the base
+case that takes of abstract values @racket[num].
+
+@interaction[#:eval redex-eval
+(define-relation PCFσ^
+  ⊑V ⊆ V × V
+  [(⊑V N num)]
+  [(⊑V N N)]
+  [(⊑V O O)]
+  [(⊑V (L ρ_1) (L ρ_2))
+   (⊑ρ ρ_1 ρ_2)]  
+  [(⊑V ((μ (X : T) L) ρ_1)
+       ((μ (X : T) L) ρ_2))
+   (⊑ρ ρ_1 ρ_2)])      
+]
+
+Approximation for addresses follows from our choice of @racket[alloc*]
+and @racket[alloc^]:
+
+@interaction[#:eval redex-eval
+(define-relation PCFσ^
+  ⊑A ⊆ A × A
+  [(⊑A (X any) X)]
+  [(⊑A (F_1 any) F_2)
+   (⊑F F_1 F_2)])
+]
+
+Notice that a concrete address is approximated by an abstract one if
+truncating the unique part of a concrete address obtains the abstract
+counterpart.
+
+Environments, which are finite maps, are defined by the usual notion
+of inclusion for maps, combined with approximation in the range:
+
+@interaction[#:eval redex-eval
+;; for every x ∈ dom(ρ_1)
+;; if ρ_1(x) = a then
+;; ρ_2(x) = a^ and a ⊑ a^ 
+(define-relation PCFσ^
+  ⊑ρ ⊆ ρ × ρ
+  [(⊑ρ () ρ)]
+  [(⊑ρ ((X_0 A_0) (X_1 A_1) ...)
+       (name ρ (_ ... (X_0 A_2) _ ...)))
+   (⊑A A_0 A_2)
+   (⊑ρ ((X_1 A_1) ...) ρ)])
+]
+
+This gives a clue as to how to define approximation for stores, too,
+but with two added complications: approximation must be used in the
+domain as well as the range and we have used a non-s-expression based
+representation.  The later means we cannot use Redex's pattern
+matching language to define the relation and instead escape to Racket:
+
+@interaction[#:eval redex-eval
+(define-relation PCFσ^
+  ⊑Σ ⊆ Σ × Σ
+  [(⊑Σ Σ_1 Σ_2)
+   (where #t
+	  (for/and ([(a us) (in-hash (term Σ))])
+	    (for/and ([u (in-set us)])
+	      (for/or ([(a^ us^) (in-hash (term Σ^))])
+	        (for/or ([u^ (in-set us^)])
+		  (and (term (⊑A ,a ,a^))
+                       (term (⊑U ,u ,u^))))))))])
+]
+
+
 
 @subsection{Discovering properties}
 
 
+@section{Going further}
 
+@subsection{Going further with Redex}
+
+hash lang, IDE integration
+
+typesetting, Scribble, web REPL
+
+@subsection{Going futher with AAM}
+
+
+@~cite[bib:scv]
+
+practical concerns, further approximations, OAAM
+
+importing ideas: abstract gc
+
+modularity, types as reductions
+
+
+@section{Acknowledgments}
+
+Earlier versions of this tutorial were presented to audiences at the
+@link["http://www.dagstuhl.de/en/program/calendar/semhp/?semnr=14271"]{Dagstuhl
+Seminar on ``Scripting Languages and Frameworks: Analysis and
+Verification''}, July 2014, and the
+@link["https://www.cs.utah.edu/~mflatt/plt-redex/"]{PLT Redex Summer
+School} at the University of Utah, July 2015; I'm grateful to the
+participants for their attention and feedback.
 
 
 @;{
