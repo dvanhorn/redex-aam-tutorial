@@ -26,6 +26,24 @@
    (make-eval
     '(require redex racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
 
+@(define bib:run-your-research
+  (make-bib
+   #:title "Run Your Research: On the Effectiveness of Lightweight Mechanization"
+   #:author (authors "Casey Klein"
+		     "John Clements"
+		     "Christos Dimoulas"
+		     "Carl Eastlund"
+		     "Matthias Felleisen"
+		     "Matthew Flatt"
+		     "Jay A. McCarthy"
+		     "Jon Rafkind"
+		     "Sam Tobin-Hochstadt"
+		     "Robert Bruce Findler")
+   #:location (proceedings-location "The 39th Annual ACM SIGPLAN-SIGACT
+Symposium on Principles of Programming Languages") 
+   #:date "2012"))
+
+
 @(define bib:pcf
   (make-bib
    #:title "LCF considered as a programming language"
@@ -110,9 +128,18 @@ Last updated: @date->string[(current-date)]
 
 @section{Introduction}
 
+@margin-note{POPL 2016: If you would like to follow along on your own
+computer, you will need the current version of
+@hyperlink["http://racket-lang.org/"]{Racket} (6.3).
+You can download the source code for this
+tutorial here:
+@url{https://github.com/dvanhorn/redex-aam-tutorial/archive/master.zip}}
+
+
 @margin-note{This is a ``living'' artifact: please submit bug reports
 and pull requests whenever you spot problems in this document.
 @url{https://github.com/dvanhorn/redex-aam-tutorial/}}
+
 
 This article provides a brief introduction to the Redex programming
 language for semantic modelling.  It does so by developing several
@@ -153,6 +180,11 @@ engineering inspired features to make models robust and includes tools
 for typesetting models and generating algebraic steppers for exploring
 program behaviors.  In brief, Redex supports all phases of the
 semantic engineering life-cycle.
+
+@margin-note{For an excellent talk motivating Redex, see the video of
+Robby Findler's
+@emph{@hyperlink["https://www.youtube.com/watch?v=BuCRToctmw0"]{Run
+Your Research}} talk at POPL 2012 @~cite[bib:run-your-research].}
 
 I have used Redex since its first release and it has played a critical
 role in several of my research projects.  It has allowed me to rapidly
@@ -2169,9 +2201,10 @@ modularity, types as reductions
 Earlier versions of this tutorial were presented to audiences at the
 @link["http://www.dagstuhl.de/en/program/calendar/semhp/?semnr=14271"]{Dagstuhl
 Seminar on ``Scripting Languages and Frameworks: Analysis and
-Verification''}, July 2014, and the
+Verification''}, July 2014, the
 @link["https://www.cs.utah.edu/~mflatt/plt-redex/"]{PLT Redex Summer
-School} at the University of Utah, July 2015; I'm grateful to the
+School} at the University of Utah, July 2015, and the University of
+Chile, January 2016; I'm grateful to the
 participants for their attention and feedback.
 
 

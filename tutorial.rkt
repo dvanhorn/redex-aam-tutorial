@@ -1,5 +1,5 @@
 #lang racket
-(require redex)
+(require redex) ; alias ` to term.
 (require "shared.rkt")
 (provide (all-defined-out))
 
@@ -36,7 +36,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reduction semantics
-
+#;
 (module+ test
   (test-->>∃ -->r (term fact-5) 120))
 
@@ -114,16 +114,19 @@
    ----------------------- μ
    (⊢ Γ (μ (X : T) L) : T)]
 
-  [(⊢ Γ M_0 : (T_1 ..._1 -> T))
+  [(⊢ Γ M_0 : (T_1 ... -> T))
    (⊢ Γ M_1 : T_1) ...
    ----------------------- app
-   (⊢ Γ (M_0 M_1 ..._1) : T)]
+   (⊢ Γ (M_0 M_1 ...) : T)]
 
   [(unique X ...)
    (⊢ (ext Γ (X T) ...) M : T_n)
    ------------------------------------------ λ
    (⊢ Γ (λ ([X : T] ...) M) : (T ... -> T_n))])
 
+#;
+(show-derivations
+ (build-derivations (⊢ () fact-5 : T)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Evaluation relation
@@ -183,7 +186,7 @@
 
 (module+ test
   (test-->> -->n (term fact-5) 120)
-  (test-->> -->v (term fact-5) 120))
+  #;(test-->> -->v (term fact-5) 120))
 
 (define-extended-language PCFn PCF
   (E ::= hole
@@ -216,7 +219,7 @@
    0))
 
 (module+ test
-  (test-->> -->n (term ((λ ([x : num]) 0) Ω)) 0)
+  (test-->> -->n #:cycles-ok (term ((λ ([x : num]) 0) Ω)) 0)
   (test-->> -->v #:cycles-ok (term ((λ ([x : num]) 0) Ω))))
 
 
@@ -816,12 +819,15 @@
 			(λ ([z : num]) z))))
 	  0 1)
 
-#;
+
 (traces
  -->vσ^
  (term (injσ∘ ((λ ([f : (num -> num)])
 		 ((λ ([_ : num]) (f 0)) (f 1)))
 	       (λ ([z : num]) Ω)))))
+
+#;
+(apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Calculating properties
