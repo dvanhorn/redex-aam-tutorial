@@ -26,6 +26,112 @@
    (make-eval
     '(require redex racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
 
+@(define DVH (author-name "David" "Van Horn"))
+@(define STH (author-name "Sam" "Tobin-Hochstadt"))
+@(define PCN "Phúc C. Nguyễn")
+
+@(define OOPSLA12
+   (proceedings-location "ACM International Conference on Object
+Oriented Programming, Systems, Languages and Applications (OOPSLA)"))
+
+@(define bib:oaam
+   (make-bib
+    #:title "Optimizing Abstract Abstract Machines"
+    #:author (authors "J. Ian Johnson"
+		      "Nicholas Labich"
+		      "Matthew Might"
+		      DVH)
+
+    #:location (proceedings-location "ACM SIGPLAN International
+Conference on Functional Programming (ICFP)")
+    #:date "2013"))
+
+@(define bib:aam-jfp
+  (make-bib
+   #:title "Systematic Abstraction of Abstract Machines"
+   #:author (authors DVH "Matthew Might")
+   #:location (journal-location "Journal of Functional Programming"
+				 #:volume "22"
+				 #:number "4-5") 
+   #:date "2012"))
+
+@(define bib:hose
+  (make-bib
+   #:title "Higher-Order Symbolic Execution with Contracts"
+   #:author (authors STH DVH)
+   #:location OOPSLA12
+   #:date "2012"))
+		     
+
+@(define bib:anadroid
+   (make-bib
+    #:title "AnaDroid: Malware Analysis of Android with User-supplied Predicates"
+    #:author (authors "Shuying Liang"
+		      "Matthew Might"
+		      DVH)
+    #:location (proceedings-location "Workshop on Tools for Automatic Program Analysis")
+    #:date "2013"))
+
+@(define bib:js
+   (make-bib
+    #:title "Pushdown Abstractions of JavaScript"
+    #:author (authors DVH
+		      "Matthew Might")
+    #:location (techrpt-location #:institution "arXiv"
+				 #:number "109-4467")
+    #:date "2011"))
+
+@(define bib:jsai
+  (make-bib
+   #:title "JSAI: A Static Analysis Platform for JavaScript"
+   #:author (authors "Vineeth Kashyap"
+		     "Kyle Dewey"
+		     "Ethan A. Kuefner"
+		     "John Wagner"
+		     "Kevin Gibbons"
+		     "John Sarracino"
+		     "Ben Wiedermann"
+		     "Ben Hardekopf")
+   #:location (proceedings-location "Symposium on Foundations of Software Engineering (FSE)")
+   #:date "2014"))
+
+@(define bib:entry-point-saturation
+  (make-bib 
+    #:title "Sound and Precise Malware Analysis for Android via
+Pushdown Reachability and Entry-Point Saturation"
+    #:author (authors "Shuying Liang"
+		      "Andrew W. Keep"
+		      "Matthew Might"
+		      "Steven Lyde"
+		      "Thomas Gilray"
+		      "Petey Aldous"
+		      DVH)
+
+    #:location (proceedings-location "Third ACM workshop on Security
+and privacy in smartphones & mobile devices")
+    #:date "2013"))
+
+
+@(define bib:gradual-typing-first-class-classes
+  (make-bib
+    #:title "Gradual Typing for First-Class Classes"
+    #:author (authors "Asumu Takikawa"
+                      "T. Stephen Strickland"
+                      "Christos Dimoulas"
+                      "Sam Tobin-Hochstadt"
+                      "Matthias Felleisen")
+    #:location OOPSLA12
+    #:date "2012"))
+
+@(define bib:constraining-delim-control
+  (make-bib
+   #:title "Constraining Delimited Control with Contracts"
+   #:author (authors "Asumu Takikawa"
+		     "T. Stephen Strickland"
+		     "Sam Tobin-Hochstadt")
+   #:location (proceedings-location "European Symposium on Programming (ESOP)")
+   #:date "2013"))
+
 @(define bib:run-your-research
   (make-bib
    #:title "Run Your Research: On the Effectiveness of Lightweight Mechanization"
@@ -40,7 +146,7 @@
 		     "Sam Tobin-Hochstadt"
 		     "Robert Bruce Findler")
    #:location (proceedings-location "The 39th Annual ACM SIGPLAN-SIGACT
-Symposium on Principles of Programming Languages") 
+Symposium on Principles of Programming Languages (POPL)") 
    #:date "2012"))
 
 
@@ -88,21 +194,26 @@ Symposium on Principles of Programming Languages")
 @(define bib:aam
    (make-bib
     #:title "Abstracting Abstract Machines"
-    #:author (authors (author-name "David" "Van Horn")
+    #:author (authors DVH
 		      "Matthew Might")
-    #:location (proceedings-location "The 15th ACM SIGPLAN International Conference on Functional Programming (ICFP'10)")
+    #:location (proceedings-location "The 15th ACM SIGPLAN International Conference on Functional Programming (ICFP)")
     #:date "2010" ; September
-    #:url "http://arxiv.org/abs/1007.4446"
+    ;#:url "http://arxiv.org/abs/1007.4446"
     ))
+
+@(define bib:counterexamples
+   (make-bib
+    #:title "Relatively Complete Counterexamples for Higher-Order Programs"
+    #:author (authors PCN DVH)
+    #:location (proceedings-location "ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI)")
+    #:date "2015"))
 
 @(define bib:scv
   (make-bib
     #:title "Soft Contract Verification"
-    #:author (authors "Phuc C. Nguyen"
-		      "Sam Tobin-Hochstadt"
-		      (author-name "David" "Van Horn"))
-    #:location (proceedings-location "The ACM SIGPLAN International Conference on Functional Programming (ICFP'14)")
-    #:url "http://arxiv.org/abs/1307.6239"
+    #:author (authors PCN STH DVH)
+    #:location (proceedings-location "The ACM SIGPLAN International Conference on Functional Programming (ICFP)")
+    ;#:url "http://arxiv.org/abs/1307.6239"
     #:date "2014"))
 
 
@@ -120,21 +231,13 @@ Symposium on Principles of Programming Languages")
 		       (alt . "Fork me on GitHub")
 		       (data-canonical-src . "https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png")))))]]
  
-@title{An Introduction to Redex with Abstracting Abstract Machines}
+@title{An Introduction to Redex with Abstracting Abstract Machines (v0.5)}
 
 @author+email["David Van Horn" "dvanhorn@cs.umd.edu"]
 
 Last updated: @date->string[(current-date)]
 
 @section{Introduction}
-
-@margin-note{POPL 2016: If you would like to follow along on your own
-computer, you will need the current version of
-@hyperlink["http://racket-lang.org/"]{Racket} (6.3).
-You can download the source code for this
-tutorial here:
-@url{https://github.com/dvanhorn/redex-aam-tutorial/archive/master.zip}}
-
 
 @margin-note{This is a ``living'' artifact: please submit bug reports
 and pull requests whenever you spot problems in this document.
@@ -209,6 +312,28 @@ simple turn-the-crank construction, into an analysis for soundly
 reasoning about programs written in that language.  It has been used
 to analyze a number of language features often considered beyond the
 pale of existing analysis approaches.
+
+@subsection{Prerequisites}
+
+This tutorial assumes you have some experience with programming
+language semantic artifacts such as grammars, reduction relations,
+evaluation relations, typing judgments.  If you have never seen these
+before, you should probably start with a graduate PL text book
+(e.g.@~cite[bib:redex]).  It does not assume you have a background in
+program analysis or abstract interpretation.
+
+This tutorial also assumes you have some experience with programming
+in a Lisp-like language.  In particular, you should be comfortable
+with the concepts behind @racket[quote], @racket[quasiquote], and
+@racket[unquote].  Having programmed with pattern matching would also
+help.
+
+You will need @hyperlink["http://racket-lang.org/"]{Racket}, which is
+very easy to install and works on all major operating sysmtes.  At the
+time of writing, version 6.3 is the latest release.
+
+You can download the source code for this tutorial here:
+@url{https://github.com/dvanhorn/redex-aam-tutorial/archive/master.zip}.
 
 @section{Warmup}
 
@@ -1292,13 +1417,14 @@ and redexes.
 @subsection{Heap-allocated bindings}
 
 In order to model imperative features such as references, arrays, or
-mutable variables, we would need to incorporate a @deftech{heap}, a
-mapping from addresses (or pointers, or locations, etc.) to values.
-Our language doesn't have any imperative features, however as we'll
-see using a heap-based machine model is an important component of the
-AAM approach to constructing analyses.  So for now, let's consider
-adding a heap to the previous machine model, despite the lack of
-imperative features.
+mutable variables---or even just to give an object-level account of
+memory allocation, rather than an implicit meta-level account---we
+need to incorporate a @deftech{heap}, a mapping from addresses (or
+pointers, or locations, etc.) to values.  Our language doesn't have
+any imperative features, however as we'll see using a heap-based
+machine model is an important component of the AAM approach to
+constructing analyses.  We will now add a heap and use it to account
+for the memory used to bind variables when a function is applied.
 
 In this model, we create a level of indirection in variable bindings
 so that environments will now map from variable names to addresses and
@@ -1322,7 +1448,8 @@ dereference bindings via the heap:
   (extend-reduction-relation
    (context-closure -->vς PCFσ (hole Σ))
    PCFσ
-   (--> (N Σ) N discard-Σ)
+   (--> (N Σ) N discard-Σ-N)
+   (--> (O Σ) N discard-Σ-O)
    (--> (((X ρ) K) Σ) ((V K) Σ) 
         (judgment-holds (lookup ρ X A))
         (judgment-holds (lookup Σ A V))
@@ -1338,6 +1465,11 @@ dereference bindings via the heap:
         (where (A_f A ...) (alloc σ))
         rec-β)))
 ]
+
+We've also added two rules for discarding the heap for final states
+that consist of numbers or primitive operations since the heap is
+irrelevant.  For function results though, we'll need to keep the heap
+to make sense of any environments inside the result.
 
 As usual, we give an injection function:
 @interaction[#:eval redex-eval
@@ -1475,7 +1607,8 @@ The full code is now:
    (extend-reduction-relation
     (context-closure -->vς PCFσ (hole Σ))
     PCFσ
-    (--> (N Σ) N discard-Σ)
+    (--> (N Σ) N discard-Σ-N)
+    (--> (O Σ) O discard-Σ-O)
     (--> (((X ρ) K) Σ) ((V K) Σ) 
          (judgment-holds (lookup ρ X A))
          (judgment-holds (lookup Σ A V))
@@ -1782,7 +1915,8 @@ follows:
    (extend-reduction-relation
     (context-closure -->vς PCFσ (hole Σ))
     PCFσ
-    (--> (N Σ) N discard-Σ)
+    (--> (N Σ) N discard-Σ-N)
+    (--> (O Σ) O discard-Σ-O)
     (--> (((X ρ) K) Σ) ((V K) Σ) 
          (judgment-holds (lookup ρ X A))
          (judgment-holds (lookup-Σ Σ A V))
@@ -1961,8 +2095,8 @@ Let's tackle numbers first.  How could a @racket[PCFσ*] program
 generate an infinite number of numbers?  Only by an unbounded number
 of applications of primitive operations.  Let's introduce an
 abstraction of numbers.  We'll use a particularly coarse abstraction
-here, but any sound, finite abstraction would work.  Here is our
-abstraction:
+here, but any sound, finite abstraction would work (e.g. we could use
+a domain of signs).  Here is our abstraction:
 
 @interaction[#:eval redex-eval
 (define-extended-language PCFσ^ PCFσ∘
@@ -2177,23 +2311,192 @@ matching language to define the relation and instead escape to Racket:
 
 @subsection{Discovering properties}
 
+At this point, we have a sound and computable approximation to the
+machine semantics for PCF.  Since we know the machine semantics
+corresponds with all the earlier higher-level semantics, we have a
+computable approximation to them as well.  But what can we do with
+such a thing?
+
+In general, program analysis is concerned with making sound
+predictions about what can happen at run-time, and we are now in a
+position to make such predictions.  The way to think about these
+predictions is to think of the (finite) graph generated by the
+iterated application of @racket[-->vσ^].  Each state of this machine
+stands for a set (which is potentially an infinite set) of
+``concrete'' machine states.
+
+If a concrete machine state is not ``stood for'' in the abstract
+graph, then it cannot be reached when the program is run.  We saw a
+simple example of this earlier: the program @racket[_Ω] never reaches
+a final value state in the abstract, therefore we can conclude that it
+never when concretely run either.
+
+By looking at the abstract semantics of @racket[(term fact-5)] we can
+conclude that if it produces a value, it produces a number.  This is
+confirming a fact implied by the type of the program.  Suppose we were
+instead dealing with an untyped language, this analysis would have
+proven the run-time type safety of the program.
+
+We can confirm this by running (an ill-typed) program and seeing that
+there are stuck states in the abstract trace.  Here's a variant of the
+factorial program that produces a function in the base case instead of
+a number:
+
+@interaction[#:eval redex-eval
+(define-term fact-5-bug
+  ((μ (fact : (num -> num))
+     (λ ([n : num])
+       (if0 n
+            add1
+            (* n (fact (sub1 n))))))
+   5))
+
+(define (final-states ss)
+  (set->list
+    (list->set 
+      (map (term-match/single PCFσ^
+             [((C K) Σ) (term C)]
+             [V (term V)])
+           ss))))
+
+(final-states
+  (apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5-bug))))
+]
+
+Here we used a small helper function to extract the stuck inner
+expression or final values and produce a set of irreducible terms.
+
+As you can see, this program either doesn't get stuck and produces
+@racket[add1], or it gets stuck trying to multiply a number by
+@racket[add1].
+
+We can also verify the safety of programs rejected by typical type
+systems.  For example, this program never produces a run-time type
+error (because it loops), but is ill-typed according to the @racket[⊢]
+judgment:
+
+@interaction[#:eval redex-eval
+(define-term safe
+  (if0 Ω (5 7) (add1 add1)))
+
+(final-states
+  (apply-reduction-relation* -->vσ^ (term (injσ∘ safe))))
+]
+
+Note that this program never reaches a stuck state.
+
+Moreover, we are given much more detail about what happens at run-time
+compared to a typical type system.  Suppose we had instead written
+this buggy factorial function that messes up the base case:
+
+@interaction[#:eval redex-eval
+(define-term fact-5-zero
+  ((μ (fact : (num -> num))
+     (λ ([n : num])
+       (if0 n
+            0
+            (* n (fact (sub1 n))))))
+   5))
+]
+
+By inspecting the trace graph for this program, it's easy to see that
+all final states are either @racket[0] or involve a multiplication by
+@racket[0].  Thus we can safely predict that if this program produces
+a result, it will be zero.
+
+We can recast classic forms of program analysis in the AAM setting.
+For example, higher-order control flow analysis is understood as the
+process of predicting, for each application in a program, which lambda
+term could be applied (i.e. where can control transfer to at that
+point).  It's easy to compute this analysis from the abstract trace
+graph: for each reachable application, the next state will be a push
+to the stack, putting the function expression in the control string
+position.  Any lambda term which could be applied is just the set of
+functions reachable from this state with the same stack.  So we can
+read off CFA results from the graph.
+
+Temporal properties can also be discovered by examing the graph.  For
+example, imagining we carried out the AAM recipe for a richer language
+that included file I/O, we could verify files are always opened before
+written to, closed only after opening, and never double-closed, etc.
 
 @section{Going further}
 
+You've now seen the basics of semantic modelling in Redex and the AAM
+approach to designing sound and computable approximations to program
+behavior.  This tutorial has only touched on the basics, but it's
+possible to go much further with both.
+
 @subsection{Going further with Redex}
 
-hash lang, IDE integration
+Redex also includes features for property-based random testing, which
+have not been covered here.  These features are great for testing
+formal claims about semantics in a lightweight way.  It's often a
+useful first step before trying to @emph{prove} something about your
+semantics.
 
-typesetting, Scribble, web REPL
+Redex also has features for typesetting your semantics.  For example,
+you can render reduction relations, judgments, etc.:
+
+@interaction[#:eval redex-eval
+(render-reduction-relation r)
+(render-judgment-form ⊢)
+]
+
+These features enable you to typeset a paper directly from a Redex
+model, avoiding the tedious work and possibility of introducing errors
+by transliterating to LaTeX.  You can export PDF or PS figures or you
+can write your entire article in Racket's Scribble language, which was
+used to prepare this document.
+
+It's also possible to take advantage of many of the other features in
+the Racket toolkit for designing languages.  For example, it's pretty
+easy to turn a Redex model into a ``@tt{#lang}'' language,
+integrating it in to the IDE and giving users a REPL for interacting
+with the model.  Once you have a @tt{#lang} version of your model,
+it's easy to deploy web REPL to make online demos and interactive
+documentation.
+
+For more details on Redex, see the Redex book@~cite[bib:redex] and
+docs.  For a paper with several case studies developing models drawn
+from published papers, see the @emph{Run Your Research}
+paper@~cite[bib:run-your-research].  For examples of papers developed
+completely in Scribble and Redex, see @emph{Gradual Typing for
+First-Class Classes}@~cite[bib:gradual-typing-first-class-classes],
+@emph{Constraining Delimited Control with
+Contracts}@~cite[bib:constraining-delim-control], or the source code
+for this tutorial.
+
 
 @subsection{Going futher with AAM}
 
+The basic idea of AAM opens up several avenues for further research.
+One is simply to scale the analysis to richer languages.  The original
+@emph{Abstracting Abstract Machine} paper@~cite[bib:aam] covers more
+advanced language features such as mutable references, first-class
+control operators, and stack inspection.  Subsequent research based on
+AAM has applied the technique to Javascript@~cite[bib:jsai bib:js],
+Dalvik (a JVM-like machine for the Android
+platform)@~cite[bib:entry-point-saturation bib:anadroid], Coq, and
+Racket@~cite[bib:hose].
 
-@~cite[bib:scv]
+Another avenue to explore is to import ideas from run-time systems
+into abstract interpretation via AAM.  For example, precision is lost
+in AAM whenever several values end up at the same heap location.  An
+obvious idea is to incorporate a garbage collector into the machine.
+The abstract garbage collector is the natural lifting of the concrete
+collector for the machine with the set-based heap.  This idea improves
+the precision and performance of the analysis and creates a kind of
+dynamic polymorphism that would be hard to imagine under traditional
+static analysis formulations such as constraint-based analyses.
 
-practical concerns, further approximations, OAAM
+In the same vein, we can take ideas for speeding up intepretation by
+writing a compiler and apply them to abstract
+interpretation@~cite[bib:oaam].
 
-importing ideas: abstract gc
+
+@~cite[bib:aam-jfp] @~cite[bib:scv] 
+@~cite[bib:counterexamples]
 
 modularity, types as reductions
 
@@ -2205,9 +2508,12 @@ Earlier versions of this tutorial were presented to audiences at the
 Seminar on ``Scripting Languages and Frameworks: Analysis and
 Verification''}, July 2014, the
 @link["https://www.cs.utah.edu/~mflatt/plt-redex/"]{PLT Redex Summer
-School} at the University of Utah, July 2015, and the University of
-Chile, January 2016; I'm grateful to the
-participants for their attention and feedback.
+School} at the University of Utah, July 2015, the University of Chile,
+January 2016, and
+@link["http://conf.researchr.org/home/POPL-2016"]{POPL}, January 2016;
+I'm grateful to the participants for their attention and feedback.  In
+particular, I'd like to thank Robby Findler, Matthias Felleisen, and
+Éric Tanter for helpful comments.
 
 
 @;{
@@ -2364,3 +2670,5 @@ relation must be defined modulo consistent renaming of variables.)
   [(subst-vars M) M])
   ]
 
+
+ LocalWords:  transliterating
