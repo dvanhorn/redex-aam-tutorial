@@ -1,5 +1,5 @@
 #lang racket
-(require redex) ; alias ` to term.
+(require redex)
 (require "shared.rkt")
 (provide (all-defined-out))
 
@@ -18,7 +18,7 @@
   (N ::= number)
   (O ::= O1 O2)
   (O1 ::= add1 sub1)
-  (O2 ::= + *)
+  (O2 ::= + * /)
   (T ::= num (T ... -> T)))
 
 
@@ -30,13 +30,30 @@
 	     (* n (fact (sub1 n))))))
    5))
 
+(define-term fact-5-bug
+  ((μ (fact : (num -> num))
+      (λ ([n : num])
+	(if0 n
+	     add1
+	     (* n (fact (sub1 n))))))
+   5))
+
+(define-term fact-5-zero
+  ((μ (fact : (num -> num))
+      (λ ([n : num])
+	(if0 n
+	     0
+	     (* n (fact (sub1 n))))))
+   5))
+
 (module+ test
-  (test-#t (redex-match? PCF M (term fact-5))))
+  (test-#t (redex-match? PCF M (term fact-5)))
+  (test-#t (redex-match? PCF M (term fact-5-bug))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Reduction semantics
-#;
+
 (module+ test
   (test-->>∃ -->r (term fact-5) 120))
 
@@ -69,7 +86,9 @@
   [(δ (+ N_0 N_1) ,(+ (term N_0) (term N_1)))]
   [(δ (* N_0 N_1) ,(* (term N_0) (term N_1)))]
   [(δ (sub1 N) ,(sub1 (term N)))]
-  [(δ (add1 N) ,(add1 (term N)))])
+  [(δ (add1 N) ,(add1 (term N)))]
+  [(δ (/ N_0 N_1) ,(quotient (term N_0) (term N_1)))
+   (side-condition ,(not (zero? (term N_1))))])
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -82,6 +101,10 @@
   
   (test-equal
    (judgment-holds (⊢ () (λ ([x : num] [x : num]) x) : T) T)
+   (term ()))
+
+  (test-equal
+   (judgment-holds (⊢ () fact-5-bug : T) T)
    (term ())))
 
 (define-extended-language PCFT PCF
@@ -136,7 +159,8 @@
               (term (120))))
 
 (define-extended-language PCF⇓ PCF
-  (V ::= N O (L ρ) ((μ (X : T) L) ρ))
+  (V ::= N P)
+  (P ::= (L ρ) ((μ (X : T) L) ρ) O)
   (ρ ::= ((X V) ...)))
 
 (define-judgment-form PCF⇓
@@ -186,7 +210,7 @@
 
 (module+ test
   (test-->> -->n (term fact-5) 120)
-  #;(test-->> -->v (term fact-5) 120))
+  (test-->> -->v (term fact-5) 120))
 
 (define-extended-language PCFn PCF
   (E ::= hole
@@ -224,6 +248,50 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CbV with Errors
+
+(module+ test
+  (test-->> -->v+err (term fact-5) 120)
+  (test-->> -->v+err (term fact-5-bug)
+            (term (err "op applied to non-number"))))
+
+(define-extended-language PCFv+err PCFv
+  (M ::= .... (err string)))
+
+(define err
+  (reduction-relation
+   PCFv+err #:domain M
+   (--> (O N ... L_1 V ...) (err "op applied to non-number"))
+   (--> (O N ... O_1 V ...) (err "op applied to non-number"))
+   (--> (O1 N ...) (err "unary op arity")
+        (side-condition (not (= 1 (length (term (N ...)))))))
+   (--> (O2 N ...) (err "binary op arity")
+        (side-condition (not (= 2 (length (term (N ...)))))))
+   (--> ((λ ([X : T] ...) M) V ...) (err "function arity")
+        (side-condition (not (= (length (term (X ...)))
+                                (length (term (V ...)))))))
+   (--> (N V ...) (err "not a function"))
+   (--> (/ N 0) (err "div by 0"))))
+
+(define abort
+  (reduction-relation
+   PCFv+err #:domain M
+   (--> (in-hole E (err string)) (err string)
+        (side-condition (not (equal? (term hole) (term E))))
+        abort)))
+
+(define v+err
+  (union-reduction-relations
+   (extend-reduction-relation v PCFv+err)
+   err))
+
+(define -->v+err
+  (union-reduction-relations
+   abort
+   (context-closure v+err PCFv+err E)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Explicit substitution reduction semantics
 
 (module+ test
@@ -253,8 +321,8 @@
 	(M (ext ρ (X_f f) (X V) ...))
 	rec-β)
 
-   (--> (O V ...) V_1
-	(judgment-holds (δ (O V ...) V_1))
+   (--> (O N ...) N_1
+	(judgment-holds (δ (O N ...) N_1))
 	δ)
 
    (--> (if0 0 C_1 C_2) C_1 if-t)
@@ -268,6 +336,58 @@
 (define-metafunction PCFρ
   injρ : M -> C
   [(injρ M) (M ())])
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Explicit substitutions with errors
+
+(module+ test
+  (test-->> -->vρ+err (term (injρ fact-5)) 120)
+  (test-->> -->vρ+err (term (injρ fact-5-bug))
+            (term (err "op applied to non-number"))))
+
+(define-extended-language PCFρ+err PCFρ
+  (C ::= .... (err string)))
+
+(define errρ
+  (reduction-relation
+   PCFρ+err #:domain C
+   (--> (O N ... P V ...)
+        (err "op applied to non-number"))
+   (--> (O1 N ...)
+        (err "unary op arity")
+        (side-condition (not (= 1 (length (term (N ...)))))))
+   (--> (O2 N ...)
+        (err "binary op arity")
+        (side-condition (not (= 2 (length (term (N ...)))))))
+   (--> (((λ ([X : T] ...) M) ρ) V ...)
+        (err "function arity")
+        (side-condition (not (= (length (term (X ...)))
+                                (length (term (V ...)))))))
+   (--> (((μ (X_f : T_f) (λ ([X : T] ...) M)) ρ) V ...)
+        (err "function arity")
+        (side-condition (not (= (length (term (X ...)))
+                                (length (term (V ...)))))))
+
+   (--> (N V ...) (err "not a function"))
+   (--> (/ N 0) (err "div by 0"))))
+
+(define abortρ
+  (reduction-relation
+   PCFρ+err #:domain C
+   (--> (in-hole E (err string)) (err string)
+        (side-condition (not (equal? (term hole) (term E))))
+        abort)))
+
+(define vρ+err
+  (union-reduction-relations
+   (extend-reduction-relation vρ PCFρ+err)
+   errρ))
+
+(define -->vρ+err
+  (union-reduction-relations
+   abortρ
+   (context-closure vρ+err PCFρ+err E)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -386,6 +506,33 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Eval/Continue/Apply machine with Errors
+
+(module+ test
+  (test-->> -->vς+err (term (injς fact-5)) 120)
+  (test-->> -->vς+err (term (injς fact-5-bug))
+            (term (err "op applied to non-number"))))
+
+(define-extended-language PCFς+err PCFς
+  (C ::= .... (err string))
+  (ς ::= .... (err string)))
+
+(define -->errς
+  (extend-reduction-relation
+   ;; Error
+   (context-closure errρ PCFς+err (hole K))
+   PCFς+err
+   ;; Abort
+   (--> ((err string) K) (err string)
+        abort)))
+
+(define -->vς+err
+  (union-reduction-relations
+   (extend-reduction-relation -->vς PCFς+err)
+   -->errς))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Eval/Continue/Apply machine with heap
 
 (module+ test
@@ -409,7 +556,8 @@
    (extend-reduction-relation
     (context-closure -->vς PCFσ (hole Σ))
     PCFσ
-    (--> (N Σ) N discard-Σ)
+    (--> (N Σ) N discard-Σ-N)
+    (--> (O Σ) O discard-Σ-O)
     (--> (((X ρ) K) Σ) ((V K) Σ)
 	 (judgment-holds (lookup ρ X A))
 	 (judgment-holds (lookup-Σ Σ A V))
@@ -538,6 +686,32 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Heap machine with Errors
+
+(module+ test
+  (test-->> -->v+errσ (term (injσ fact-5)) 120)
+  (test-->> -->v+errσ (term (injσ fact-5-bug))
+            (term (err "op applied to non-number"))))
+
+(define-extended-language PCFσ+err PCFσ
+  (C ::= .... (err string))
+  (σ ::= .... (err string)))
+
+(define -->errσ
+  (extend-reduction-relation
+   ;; Error
+   (context-closure errρ PCFσ+err ((hole K) Σ))
+   PCFσ+err
+   ;; Abort
+   (--> (((err string) K) Σ) (err string) abort)))
+
+(define -->v+errσ
+  (union-reduction-relations
+   (extend-reduction-relation (-->vσ/Σ alloc ext lookup) PCFσ+err)
+   -->errσ))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Heap allocated continuations
 
 (module+ test
@@ -593,6 +767,32 @@
 ;; Exercise: formulate and test an invariant between
 ;; -->vσ* and -->vσ.
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Heap allocated with Errors
+
+(module+ test
+  (test-->> -->v+errσ* (term (injσ fact-5)) 120)
+  (test-->> -->v+errσ* (term (injσ fact-5-bug))
+            (term (err "op applied to non-number"))))
+
+(define-extended-language PCFσ*+err PCFσ*
+  (C ::= .... (err string))
+  (σ ::= .... (err string)))
+
+(define -->errσ*
+  (extend-reduction-relation -->errσ PCFσ*+err))
+
+(define-syntax-rule
+  (-->vσ*+err/Σ alloc* ext-Σ lookup-Σ)
+  (union-reduction-relations
+   (extend-reduction-relation (-->vσ*/Σ alloc* ext-Σ lookup-Σ) PCFσ*+err)
+   -->errσ*))
+
+(define -->v+errσ*
+  (-->vσ*+err/Σ alloc* ext lookup))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set-based heap
 
@@ -618,6 +818,26 @@
 
 ;; Exercise: formulate and test an invariant between
 ;; -->vσ* and -->vσ∘.
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set-based with Errors
+
+(module+ test
+  (test-->> -->v+errσ∘ (term (injσ∘ fact-5)) 120)
+  (test-->> -->v+errσ∘ (term (injσ∘ fact-5-bug))
+            (term (err "op applied to non-number"))))
+
+(define-extended-language PCFσ∘+err PCFσ∘
+  (C ::= .... (err string))
+  (σ ::= .... (err string)))
+
+(define-syntax-rule (-->v+errσ∘/Σ alloc ext-Σ lookup-Σ)
+  (union-reduction-relations
+   (extend-reduction-relation (-->vσ∘/Σ alloc ext-Σ lookup-Σ) PCFσ∘+err)
+   (extend-reduction-relation -->errσ* PCFσ∘+err)))
+
+(define -->v+errσ∘ (-->v+errσ∘/Σ alloc∘ ext-Σ lookup-Σ))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -658,6 +878,31 @@
    (--> (((if0 num C_1 C_2) K) Σ)
 	((C_2 K) Σ)
 	if0-num-f)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; AAM with Errors
+
+(module+ test
+  (test-->> -->v+errσ^ (term (injσ∘ fact-5)) 1 'num)    
+  (test-->> -->v+errσ^ (term (injσ∘ fact-5-bug))
+            (term add1)
+            (term (err "op applied to non-number"))))
+
+(define-extended-language PCFσ^+err PCFσ^
+  (C ::= .... (err string))
+  (σ ::= .... (err string)))
+
+(define -->errσ^
+  (reduction-relation
+   PCFσ^+err #:domain σ
+   (--> (((/ N num) K) Σ) (err "div by 0"))))
+
+(define -->v+errσ^ 
+  (union-reduction-relations
+   -->errσ^
+   (extend-reduction-relation -->vσ^ PCFσ^+err)
+   (extend-reduction-relation -->errσ* PCFσ^+err)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -819,7 +1064,7 @@
 			(λ ([z : num]) z))))
 	  0 1)
 
-
+#;
 (traces
  -->vσ^
  (term (injσ∘ ((λ ([f : (num -> num)])
