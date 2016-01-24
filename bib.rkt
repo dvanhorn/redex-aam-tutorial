@@ -78,7 +78,7 @@ Principles in Programming Languages (POPL)")
 
 (define bib:aac
   (make-bib
-   #:title ""
+   #:title "Abstracting Abstract Control"
    #:author (authors "J. Ian Johnson"
 		     DVH)
    #:location (proceedings-location "ACM Symposium on Dynamic
