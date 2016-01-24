@@ -561,6 +561,18 @@ for this program.
 (judgment-holds (⊢ () fact-5 : T) T)
 ]
 
+It's possible to illustrate judgments as follows:
+
+@interaction[#:eval redex-eval
+(eval:alts
+(show-derivations
+ (build-derivations 
+  (⊢ () (λ ([x : num]) (add1 x)) : T)))
+(void))
+]
+
+@image[#:suffixes '(".pdf" ".png")]{img/show-derivations}
+
 We can verify that ill-formed lambda-abstractions have no type:
 
 @interaction[#:eval redex-eval
@@ -2246,7 +2258,6 @@ you can render reduction relations, judgments, etc.:
 
 @interaction[#:eval redex-eval
 (render-reduction-relation r)
-(render-judgment-form ⊢)
 ]
 
 These features enable you to typeset a paper directly from a Redex
@@ -2283,8 +2294,8 @@ advanced language features such as mutable references, first-class
 control operators, and stack inspection.  Subsequent research based on
 AAM has applied the technique to Javascript@~cite[bib:jsai bib:js],
 Dalvik (a JVM-like machine for the Android
-platform)@~cite[bib:entry-point-saturation bib:anadroid], Coq, and
-Racket@~cite[bib:hose].
+platform)@~cite[bib:entry-point-saturation bib:anadroid], and
+Racket@~cite[bib:hose bib:scv].
 
 Another avenue to explore is to import ideas from run-time systems
 into abstract interpretation via AAM.  For example, precision is lost
@@ -2302,11 +2313,36 @@ interpretation@~cite[bib:oaam].
 The basic AAM approach approximates a potential infinite-state
 transition system with a finite state machine.  This is a fairly
 heavy-handed way of achieving decidability and there's been work on
-increasing the power of the abstraction model that of pushdown
-systems HERE.
+increasing the power of the abstraction model that of pushdown system.
+There have been several formulations of such an
+analysis@~cite[bib:cfa2 bib:pdcfa bib:aam-jfp], but the basic idea is
+that you skip the heap-allocated continuation step presented here and
+leave the stack in place when abstracting.  It's not hard to see that
+the resulting machine has a state that consists of finite component
+(the closure and heap) and a control stack whose alphabet of stack
+frames is drawn from a finite alphabet.  Since the machine always
+treats the stack in a stack-like manner, i.e. it only inspects the top
+element and pushes and pops single frames at a time, it forms a
+pushdown automata.  Unlike the finite state abstraction, the resulting
+machine always matches function calls and returns precisely.  However,
+the added computational power requires different fixed-point
+algorithms since iterating the transition relation may not terminate.
+Care must also be taken when language features are included that don't
+obey the stack discipline of a pushdown automaton.  For example,
+garbage collection or first-class control operators may require
+traversing the stack, which is not permitted in the pushdown model;
+consequently, special purpose algorithms have been developed to walk
+the fine line between pushdown models and decidability for control
+operators@~cite[bib:cfa2-callcc bib:aac] and GC@~cite[bib:pdgc
+bib:pdgc-jfp].  Recently, a simple algorithm for pushdown CFA has been
+developed whose time complexity is cubic when using an abstract
+allocation strategy like the one used in these notes, which is the
+same complexity as the best finite state
+algorithm@~cite[bib:pdcfa-for-free].
 
 
-@~cite[bib:aam-jfp] @~cite[bib:scv] 
+
+@~cite[bib:scv] 
 @~cite[bib:counterexamples]
 
 modularity, types as reductions

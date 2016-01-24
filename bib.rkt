@@ -13,6 +13,81 @@
 Object-Oriented Programming, Systems, Languages and
 Applications (OOPSLA)"))
 
+(define bib:pdcfa-for-free
+  (make-bib
+   #:title "Pushdown Control-Flow Analysis for Free"
+   #:author (authors "Thomas Gilray"
+		     "Steven Lyde"
+		     "Michael D. Adams"
+		     "Matthew Might"
+		     DVH)
+   #:location (proceedings-location "ACM SIGPLAN-SIGACT Symposium on
+Principles in Programming Languages (POPL)")
+   #:date "2016"))
+
+(define bib:pdgc
+  (make-bib
+   #:title "Introspective Pushdown Analysis of Higher-Order Programs"
+   #:author (authors "Christopher Earl"
+		     "Ilya Sergey"
+		     "Matthew Might"
+		     DVH)
+   #:location (proceedings-location "ACM SIGPLAN International Conference on Functional Programming (ICFP)")
+   #:date "2012"))
+
+(define bib:pdgc-jfp
+  (make-bib
+   #:title "Pushdown flow analysis with abstract garbage collection"
+   #:author (authors "J. Ian Johnson"
+		     "Ilya Sergey"
+		     "Christopher Earl"
+		     "Matthew Might"
+		     DVH)
+   #:location (journal-location "Journal of Functional Programming"
+				#:volume "24"
+				#:number "2--3")
+   #:date "2014"))
+
+(define bib:aac
+  (make-bib
+   #:title ""
+   #:author (authors "J. Ian Johnson"
+		     DVH)
+   #:location (proceedings-location "ACM Symposium on Dynamic
+Languages (DLS)")
+   #:date "2014"))
+
+(define bib:cfa2-callcc
+  (make-bib
+   #:title "Pushdown Flow Analysis of First-Class Control"
+   #:author (authors "Dimitris Vardoulakis"
+		     "Olin Shivers")
+   #:location (proceedings-location "ACM SIGPLAN International
+Conference on Functional Programming (ICFP)")
+   #:date "2011"))
+		     
+
+(define bib:cfa2
+  (make-bib
+   #:title "CFA2: a Context-Free Approach to Control-Flow Analysis"
+   #:author (authors "Dimitris Vardoulakis"
+		     "Olin Shivers")
+   #:location (journal-location "Logical Methods in Computer Science"
+				#:volume "7"
+				#:number "2-3")
+   #:date "2011"))
+
+(define bib:pdcfa
+  (make-bib
+   #:title "Pushdown Control-Flow Analysis of Higher-Order Programs"
+   #:author (authors "Christopher Earl"
+		     "Matthew Might"
+		     DVH)
+
+   #:location (proceedings-location "Workshop on Scheme and Functional
+Programming (SFP)")
+   #:date "2010"))
+
 (define bib:oaam
   (make-bib
    #:title "Optimizing Abstract Abstract Machines"
