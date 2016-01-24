@@ -117,7 +117,10 @@ is that a programming language's semantics can be transformed, by a
 simple turn-the-crank construction, into an analysis for soundly
 reasoning about programs written in that language.  It has been used
 to analyze a number of language features often considered beyond the
-pale of existing analysis approaches.
+pale of existing analysis approaches.  A key advantage of the approach
+is that ideas from programming language design and implementation can
+be directly imported and applied to the design and implementation of
+abstract interpreters.
 
 @subsection{Prerequisites}
 
@@ -2231,19 +2234,18 @@ graph: for each reachable application, the next state will be a push
 to the stack, putting the function expression in the control string
 position.  Any lambda term which could be applied is just the set of
 functions reachable from this state with the same stack.  So we can
-read off CFA results from the graph.
-
-Temporal properties can also be discovered by examing the graph.  For
-example, imagining we carried out the AAM recipe for a richer language
-that included file I/O, we could verify files are always opened before
-written to, closed only after opening, and never double-closed, etc.
+read off CFA results from the graph.  Temporal properties can also be
+discovered by examing the graph.  For example, imagining we carried
+out the AAM recipe for a richer language that included file I/O, we
+could verify files are always opened before written to, closed only
+after opening, and never double-closed.
 
 @section{Going further}
 
-You've now seen the basics of semantic modelling in Redex and the AAM
-approach to designing sound and computable approximations to program
-behavior.  This tutorial has only touched on the basics, but it's
-possible to go much further with both.
+You have now seen the basics of semantic modelling in Redex and the
+AAM approach to designing sound and computable approximations to
+program behavior.  This tutorial has only touched on the basics, but
+it's possible to go much further with both.
 
 @subsection{Going further with Redex}
 
@@ -2291,9 +2293,10 @@ The basic idea of AAM opens up several avenues for further research.
 One is simply to scale the analysis to richer languages.  The original
 @emph{Abstracting Abstract Machine} paper@~cite[bib:aam] covers more
 advanced language features such as mutable references, first-class
-control operators, and stack inspection.  Subsequent research based on
-AAM has applied the technique to Javascript@~cite[bib:jsai bib:js],
-Dalvik (a JVM-like machine for the Android
+control operators, and stack inspection, and extends naturally to
+handle concurrency@~cite[bib:aam-concurrency]. Subsequent research
+based on AAM has applied the technique to Javascript@~cite[bib:jsai
+bib:js], Dalvik (a JVM-like machine for the Android
 platform)@~cite[bib:entry-point-saturation bib:anadroid], and
 Racket@~cite[bib:hose bib:scv].
 
@@ -2340,13 +2343,22 @@ allocation strategy like the one used in these notes, which is the
 same complexity as the best finite state
 algorithm@~cite[bib:pdcfa-for-free].
 
-
-
-@~cite[bib:scv] 
-@~cite[bib:counterexamples]
-
-modularity, types as reductions
-
+The AAM approach starts from a machine semantics and produces a
+computable abstraction to predict the behavior that arises at
+run-time.  As such, it produces a @emph{whole-program} analysis.  It
+may seem that the approach is fundamentally at odds with a modular
+analysis since it's so closely tied to the machine semantics, which
+are necessarily (it would seem) defined for whole programs.  Modular
+higher-order flow analyses are few and far
+between@~cite[bib:shivers-phd bib:componential] in part because
+analyzing incomplete programs is difficult since behavioral values may
+escape to or be provided by the unknown, external world.  However, the
+AAM approach can be extended to perform modular analysis.  Rather than
+solving the modularity problem @emph{after} abstraction, an
+alternative approach is to construct a concrete semantics of modular
+(or incomplete) programs@~cite[bib:hose bib:scv bib:counterexamples]
+and then run through the usual AAM steps to obtain a modular abstract
+interpreter.
 
 @section{Acknowledgments}
 

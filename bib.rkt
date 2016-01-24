@@ -13,6 +13,34 @@
 Object-Oriented Programming, Systems, Languages and
 Applications (OOPSLA)"))
 
+(define bib:aam-concurrency
+  (make-bib
+   #:title "A Family of Abstract Interpretations for Static Analysis
+of Concurrent Higher-Order Programs"
+   #:author (authors "Matthew Might"
+		     DVH)
+   #:location (proceedings-location "International Static Analysis
+Symposium (SAS)")
+   #:date "2011"))
+
+(define bib:shivers-phd
+  (make-bib
+   #:title "Control-Flow Analysis of Higher-Order Languages"
+   #:author "Olin Shivers"
+   #:location (dissertation-location #:institution "Carnegie Mellon University"
+				     #:degree "PhD")
+   #:date "1991"))
+
+(define bib:componential
+  (make-bib
+   #:title "Componential set-based analysis"
+   #:author (authors "Cormac Flannagan"
+		     "Matthias Felleisen")
+   #:location (journal-location "Componential set-based analysis"
+				#:volume "21"
+				#:number "2")
+   #:date "1999"))
+
 (define bib:pdcfa-for-free
   (make-bib
    #:title "Pushdown Control-Flow Analysis for Free"
