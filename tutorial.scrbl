@@ -2120,12 +2120,12 @@ matching language to define the relation and instead escape to Racket:
   ⊑Σ ⊆ Σ × Σ
   [(⊑Σ Σ_1 Σ_2)
    (where #t
-	  (for/and ([(a us) (in-hash (term Σ))])
-	    (for/and ([u (in-set us)])
-	      (for/or ([(a^ us^) (in-hash (term Σ^))])
-	        (for/or ([u^ (in-set us^)])
-		  (and (term (⊑A ,a ,a^))
-                       (term (⊑U ,u ,u^))))))))])
+	  ,(for/and ([(a us) (in-hash (term Σ_1))])
+	     (for/and ([u (in-set us)])
+	       (for/or ([(a^ us^) (in-hash (term Σ_2))])
+	         (for/or ([u^ (in-set us^)])
+		   (and (term (⊑A ,a ,a^))
+                        (term (⊑U ,u ,u^))))))))])
 ]
 
 
