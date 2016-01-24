@@ -138,7 +138,7 @@ with the concepts behind @racket[quote], @racket[quasiquote], and
 help.
 
 You will need @hyperlink["http://racket-lang.org/"]{Racket}, which is
-very easy to install and works on all major operating sysmtes.  At the
+very easy to install and works on all major operating systems.  At the
 time of writing, version 6.3 is the latest release.
 
 You can download the source code for this tutorial here:
