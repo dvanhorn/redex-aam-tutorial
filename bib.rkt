@@ -13,6 +13,30 @@
 Object-Oriented Programming, Systems, Languages and
 Applications (OOPSLA)"))
 
+(define bib:monadic
+  (make-bib 
+   #:title "Monadic Abstract Interpreters"
+   #:author (authors "Ilya Sergey"
+		     "Dominique Devriese"
+		     "Matthew Might"
+		     "Jan Midtgaard"
+		     "David Darais"
+		     "Dave Clarke"
+		     "Frank Piessens")
+  #:location (proceedings-location "ACM SIGPLAN Conference on
+Programming Language Design and Implementation (PLDI)")
+  #:date "2013"))
+
+(define bib:galois-transformers
+  (make-bib
+   #:title "Galois Transformers and Modular Abstract Interpreters"
+   #:author (authors "David Darais"
+		     DVH)
+   #:location (proceedings-location "ACM International Conference on
+Object-Oriented Programming, Systems, Languages and
+Applications (OOPSLA)")   
+   #:date "2015"))
+
 (define bib:aam-concurrency
   (make-bib
    #:title "A Family of Abstract Interpretations for Static Analysis

@@ -2311,7 +2311,14 @@ dynamic polymorphism that would be hard to imagine under traditional
 static analysis formulations such as constraint-based analyses.  In
 the same vein, we can take ideas for speeding up intepretation by
 writing a compiler and apply them to abstract
-interpretation@~cite[bib:oaam].
+interpretation@~cite[bib:oaam].  We can also import ideas for the
+structuring of extensible interpreters in order to structure abstract
+interpreters.  For example, our abstract machine semantics is
+implicitly organized around a state and non-determinism monad, which
+can be made explicit@~cite[bib:monadic].  Going a step further, we can
+use monad transformers to automatically construct abstract
+interpreters out of off-the-shelf
+abstractions@~cite[bib:galois-transformers].
 
 The basic AAM approach approximates a potential infinite-state
 transition system with a finite state machine.  This is a fairly
