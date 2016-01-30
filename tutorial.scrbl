@@ -297,9 +297,9 @@ functions.
 
 @margin-note{Greek symbols: you can enter Greek symbols in the
 DrRacket IDE by typing many common LaTeX commands followed by
-Command-\.  For example ``\sigma'' plus Command-\ will enter ``σ''.
-To make things easier, you can type a unique prefix, so ``\sig'' plus
-Command-\ will also enter a ``σ'' as well.}
+Control-\ (in OS X).  For example ``\sigma'' plus Control-\ will enter 
+``σ''. To make things easier, you can type a unique prefix, so ``\sig'' 
+plus Control-\ will also enter a ``σ'' as well.}
 
 Compared with the warmup example, there's really not much to point
 other than the use of @racket[variable-not-otherwise-mentioned], which
