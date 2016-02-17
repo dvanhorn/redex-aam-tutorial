@@ -353,7 +353,7 @@ grammar, we can define a @deftech{language extension} as follows:
 
 The @racket[PCFT] language includes everything in the @racket[PCF]
 language, plus a notion of type environments @racket[Γ], which are
-sequence of variable and type pairs.  (Language extensions can also
+sequences of variable and type pairs.  (Language extensions can also
 replace or augment existing non-terminals, as we'll see later.)
 
 Let's first take a detour to develop some useful, general purpose
