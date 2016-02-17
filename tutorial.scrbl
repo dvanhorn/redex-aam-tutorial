@@ -522,7 +522,7 @@ relation ``@racket[⊢]'':
 The @racket[define-judgment-form] specifies a @deftech{relation}.
 Conceptually, a relation in Redex is a function from inputs to sets of
 outputs and the definition of a relation must specify which positions
-of relation are inputs and which are outputs, as seen in the
+of the relation are inputs and which are outputs, as seen in the
 @racket[#:mode] spec.  This relation has three inputs (although the
 last one is always the constant ``@racketresult[:]'' to make the form
 easier to read) and one output.  The two real inputs are the type
