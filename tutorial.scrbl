@@ -152,7 +152,7 @@ mechanism.
 
 @margin-note{To follow along with this tutorial, you must `(require redex)` immediately below your `#lang racket` definition in DrRacket.}
 
-An s-expression is a potentially nested peice of data that may include
+An s-expression is a potentially nested piece of data that may include
 numbers, booleans, symbols, and lists of s-expressions.  Before
 getting in to how to model semantics with Redex, let's just play with
 some simple examples.
