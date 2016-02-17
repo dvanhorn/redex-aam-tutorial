@@ -267,7 +267,7 @@ Now that we have seen the basics, we can move on to a real example.
 @section{PCF}
 
 Let's start by building a model of a very simple, typed functional
-programming language based on PCF language@~cite[bib:pcf].
+programming language based on the PCF language@~cite[bib:pcf].
 Although simple, PCF contains all the essential elements of a real
 programming language.  Scaling the approach of these notes up to a
 more sophisticated language is just a small matter of semantic
