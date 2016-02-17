@@ -444,7 +444,7 @@ there is one; otherwise it prepends the new association to the list.
 
 Lastly, we will want to assert that @racket[λ]-bound variables are
 unique, so let's define a @racket[unique] predicate, which holds when
-all it's arguments are distinct:
+all its arguments are distinct:
 
 @interaction[#:eval redex-eval
 (define-metafunction REDEX
@@ -1013,7 +1013,7 @@ could aslo have added clauses to this definition, which are
 conceptually prepended to those of @racket[to-five], but there's no
 need in this case.)  However, this has no effect on the original
 definition of @racket[to-five], which is what is used within
-@racket[r1] @emph{and} it's extension @racket[r1′].  So the problem
+@racket[r1] @emph{and} its extension @racket[r1′].  So the problem
 remains.
 
 We could have used @racket[to-five/L1] in the original definition of
