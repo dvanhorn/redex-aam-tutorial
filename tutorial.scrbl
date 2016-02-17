@@ -1043,7 +1043,7 @@ substitution, we can also formulate computation as a reduction system
 based on environments that is substitution-free.  Such a reduction
 semantics is known as an @deftech{explicit substitution} semantics
 since the meta-theoretic notion of substitution is represented
-explicit in the system@~cite[bib:explicit].
+explicitly in the system@~cite[bib:explicit].
 
 @interaction[#:eval redex-eval
 (define-extended-language PCFρ PCF⇓
