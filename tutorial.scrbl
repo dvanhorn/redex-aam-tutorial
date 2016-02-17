@@ -553,7 +553,7 @@ from other judgment definitions or metafunctions.  The
 This use specifies a type @racketresult[(num -> num)] and verifies this type
 is in the typing relation.
 
-Alternatively, we can use a meta-variable in the type position in
+Alternatively, we can use a metavariable in the type position in
 order to compute all of the types this term has.  This metavariable is
 bound to these types in the scope of the following term which, in this
 case is just @racket[T].  Consequently the result is the list of types
