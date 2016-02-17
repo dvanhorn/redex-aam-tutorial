@@ -61,7 +61,7 @@ So this tutorial aims to accomplish two goals:
 @itemlist[
 
 @item{(1) to introduce semantic engineers (programming language
-researchers, langauge designers and implementors, analysis and tool
+researchers, language designers and implementors, analysis and tool
 builders, etc.) to the Redex programming language;}
 
 @item{(2) to demonstrate the method of building abstract interpreters
@@ -1026,7 +1026,7 @@ which is to enable a single point of control; this approach duplicates
 code and inflicts all the problems that follow.
 
 The approach we take in this tutorial is to avoid all
-langauge-specific metafunction, relations, and judgments when defining
+language-specific metafunction, relations, and judgments when defining
 reduction relations.  We use instead only metafunctions, relations,
 and judgments that are either (1) defined only in terms of Redex's
 built in patterns (for example, @racket[lookup], @racket[ext], and
@@ -1495,7 +1495,7 @@ semantics that abandons the stack model, instead modelling the
 continuation as a linked-list structure allocated in the heap.
 
 There are several practical reasons one might want to do this; for
-example, this is the implementation strategy of many langauges
+example, this is the implementation strategy of many languages
 supporting first-class continuations.  However, as we'll see, this is
 another step relevant to the AAM approach for constructing finite
 models of programs.
@@ -1677,7 +1677,7 @@ not have the property ``causes a run-time type-error,'' we could
 design a language of types; define a typing relation between programs
 and types; prove soundness of the relation, meaning programs in the
 relation do not cause run-time errors; since in most cases the typing
-relation will not be algorithmic, define a langauge of type
+relation will not be algorithmic, define a language of type
 constraints and a mapping from programs to type constraints; design a
 resolution method for solving type constraints and prove it complete
 (or maybe not).  All this, only to discover many programs can't be
