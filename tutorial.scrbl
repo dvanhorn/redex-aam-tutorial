@@ -2379,7 +2379,8 @@ January 2016, and
 @link["http://conf.researchr.org/home/POPL-2016"]{POPL}, January 2016;
 I'm grateful to the participants for their attention and feedback.  In
 particular, I'd like to thank Robby Findler, Matthias Felleisen, and
-Éric Tanter for helpful comments.
+Éric Tanter for helpful comments.  I'm grateful to Nada Amin, Michael
+Bernstein, Andrew Kent, and Phúc C. Nguyễn for pull requests.
 
 
 @;{
