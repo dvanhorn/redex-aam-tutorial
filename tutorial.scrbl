@@ -61,7 +61,7 @@ So this tutorial aims to accomplish two goals:
 @itemlist[
 
 @item{(1) to introduce semantic engineers (programming language
-researchers, langauge designers and implementors, analysis and tool
+researchers, language designers and implementors, analysis and tool
 builders, etc.) to the Redex programming language;}
 
 @item{(2) to demonstrate the method of building abstract interpreters
@@ -152,7 +152,7 @@ mechanism.
 
 @margin-note{To follow along with this tutorial, you must `(require redex)` immediately below your `#lang racket` definition in DrRacket.}
 
-An s-expression is a potentially nested peice of data that may include
+An s-expression is a potentially nested piece of data that may include
 numbers, booleans, symbols, and lists of s-expressions.  Before
 getting in to how to model semantics with Redex, let's just play with
 some simple examples.
@@ -267,7 +267,7 @@ Now that we have seen the basics, we can move on to a real example.
 @section{PCF}
 
 Let's start by building a model of a very simple, typed functional
-programming language based on PCF language@~cite[bib:pcf].
+programming language based on the PCF language@~cite[bib:pcf].
 Although simple, PCF contains all the essential elements of a real
 programming language.  Scaling the approach of these notes up to a
 more sophisticated language is just a small matter of semantic
@@ -353,7 +353,7 @@ grammar, we can define a @deftech{language extension} as follows:
 
 The @racket[PCFT] language includes everything in the @racket[PCF]
 language, plus a notion of type environments @racket[Γ], which are
-sequence of variable and type pairs.  (Language extensions can also
+sequences of variable and type pairs.  (Language extensions can also
 replace or augment existing non-terminals, as we'll see later.)
 
 Let's first take a detour to develop some useful, general purpose
@@ -444,7 +444,7 @@ there is one; otherwise it prepends the new association to the list.
 
 Lastly, we will want to assert that @racket[λ]-bound variables are
 unique, so let's define a @racket[unique] predicate, which holds when
-all it's arguments are distinct:
+all its arguments are distinct:
 
 @interaction[#:eval redex-eval
 (define-metafunction REDEX
@@ -522,7 +522,7 @@ relation ``@racket[⊢]'':
 The @racket[define-judgment-form] specifies a @deftech{relation}.
 Conceptually, a relation in Redex is a function from inputs to sets of
 outputs and the definition of a relation must specify which positions
-of relation are inputs and which are outputs, as seen in the
+of the relation are inputs and which are outputs, as seen in the
 @racket[#:mode] spec.  This relation has three inputs (although the
 last one is always the constant ``@racketresult[:]'' to make the form
 easier to read) and one output.  The two real inputs are the type
@@ -553,7 +553,7 @@ from other judgment definitions or metafunctions.  The
 This use specifies a type @racketresult[(num -> num)] and verifies this type
 is in the typing relation.
 
-Alternatively, we can use a meta-variable in the type position in
+Alternatively, we can use a metavariable in the type position in
 order to compute all of the types this term has.  This metavariable is
 bound to these types in the scope of the following term which, in this
 case is just @racket[T].  Consequently the result is the list of types
@@ -1013,7 +1013,7 @@ could aslo have added clauses to this definition, which are
 conceptually prepended to those of @racket[to-five], but there's no
 need in this case.)  However, this has no effect on the original
 definition of @racket[to-five], which is what is used within
-@racket[r1] @emph{and} it's extension @racket[r1′].  So the problem
+@racket[r1] @emph{and} its extension @racket[r1′].  So the problem
 remains.
 
 We could have used @racket[to-five/L1] in the original definition of
@@ -1026,7 +1026,7 @@ which is to enable a single point of control; this approach duplicates
 code and inflicts all the problems that follow.
 
 The approach we take in this tutorial is to avoid all
-langauge-specific metafunction, relations, and judgments when defining
+language-specific metafunction, relations, and judgments when defining
 reduction relations.  We use instead only metafunctions, relations,
 and judgments that are either (1) defined only in terms of Redex's
 built in patterns (for example, @racket[lookup], @racket[ext], and
@@ -1043,7 +1043,7 @@ substitution, we can also formulate computation as a reduction system
 based on environments that is substitution-free.  Such a reduction
 semantics is known as an @deftech{explicit substitution} semantics
 since the meta-theoretic notion of substitution is represented
-explicit in the system@~cite[bib:explicit].
+explicitly in the system@~cite[bib:explicit].
 
 @interaction[#:eval redex-eval
 (define-extended-language PCFρ PCF⇓
@@ -1495,7 +1495,7 @@ semantics that abandons the stack model, instead modelling the
 continuation as a linked-list structure allocated in the heap.
 
 There are several practical reasons one might want to do this; for
-example, this is the implementation strategy of many langauges
+example, this is the implementation strategy of many languages
 supporting first-class continuations.  However, as we'll see, this is
 another step relevant to the AAM approach for constructing finite
 models of programs.
@@ -1677,7 +1677,7 @@ not have the property ``causes a run-time type-error,'' we could
 design a language of types; define a typing relation between programs
 and types; prove soundness of the relation, meaning programs in the
 relation do not cause run-time errors; since in most cases the typing
-relation will not be algorithmic, define a langauge of type
+relation will not be algorithmic, define a language of type
 constraints and a mapping from programs to type constraints; design a
 resolution method for solving type constraints and prove it complete
 (or maybe not).  All this, only to discover many programs can't be
