@@ -2039,7 +2039,7 @@ approximates @racket[_σ_1], the @racket[-->vσ^] machine steps to a
 state that approximates @racket[_σ_2].  It may also step to other
 states---such is the nature of approximation---but at least one of the
 successor states will be an approximation of the ``real'' successor.
-Consquently, while the concrete machines reduction may produce an
+Consequently, while the concrete machines reduction may produce an
 infinite trace of states, that infinite trace will follow a path
 through the finite graph of the abstract reduction graph.
 
