@@ -1718,7 +1718,7 @@ We will discover properties of the run-time behavior of a program
 With @racket[PCFσ*], we had a machine with heap-bound bindings and
 continuations.  One of the key mechanisms for turning a concrete
 semantics into a computable, approximating semantics is to bound the
-size of this heap.  As we'll see, doing requires using a different
+size of this heap.  As we'll see, doing this requires using a different
 notion of a heap (an ``abstract'' heap).
 
 So our next step will be an abstraction of the @racket[PCFσ*] machine
@@ -2039,7 +2039,7 @@ approximates @racket[_σ_1], the @racket[-->vσ^] machine steps to a
 state that approximates @racket[_σ_2].  It may also step to other
 states---such is the nature of approximation---but at least one of the
 successor states will be an approximation of the ``real'' successor.
-Consquently, while the concrete machines reduction may produce an
+Consequently, while the concrete machines reduction may produce an
 infinite trace of states, that infinite trace will follow a path
 through the finite graph of the abstract reduction graph.
 
@@ -2323,7 +2323,7 @@ abstractions@~cite[bib:galois-transformers].
 The basic AAM approach approximates a potential infinite-state
 transition system with a finite state machine.  This is a fairly
 heavy-handed way of achieving decidability and there's been work on
-increasing the power of the abstraction model that of pushdown system.
+increasing the power of the abstraction model to that of pushdown system.
 There have been several formulations of such an
 analysis@~cite[bib:cfa2 bib:pdcfa bib:aam-jfp], but the basic idea is
 that you skip the heap-allocated continuation step presented here and

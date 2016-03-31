@@ -58,7 +58,7 @@ Symposium (SAS)")
 (define bib:componential
   (make-bib
    #:title "Componential set-based analysis"
-   #:author (authors "Cormac Flannagan"
+   #:author (authors "Cormac Flanagan"
 		     "Matthias Felleisen")
    #:location (journal-location "Componential set-based analysis"
 				#:volume "21"
