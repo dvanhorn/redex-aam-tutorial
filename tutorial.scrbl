@@ -1270,7 +1270,7 @@ dereference bindings via the heap:
    (context-closure -->vς PCFσ (hole Σ))
    PCFσ
    (--> (N Σ) N discard-Σ-N)
-   (--> (O Σ) N discard-Σ-O)
+   (--> (O Σ) O discard-Σ-O)
    (--> (((X ρ) K) Σ) ((V K) Σ) 
         (judgment-holds (lookup ρ X A))
         (judgment-holds (lookup Σ A V))
