@@ -2150,7 +2150,7 @@ If a concrete machine state is not ``stood for'' in the abstract
 graph, then it cannot be reached when the program is run.  We saw a
 simple example of this earlier: the program @racket[_Ω] never reaches
 a final value state in the abstract, therefore we can conclude that it
-never when concretely run either.
+never finishes when concretely run either.
 
 By looking at the abstract semantics of @racket[(term fact-5)] we can
 conclude that if it produces a value, it produces a number.  This is
