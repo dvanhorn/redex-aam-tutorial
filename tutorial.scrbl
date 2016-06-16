@@ -139,7 +139,7 @@ help.
 
 You will need @hyperlink["http://racket-lang.org/"]{Racket}, which is
 very easy to install and works on all major operating systems.  At the
-time of writing, version 6.3 is the latest release.
+time of writing, version 6.5 is the latest release.
 
 You can download the source code for this tutorial here:
 @url{https://github.com/dvanhorn/redex-aam-tutorial/archive/master.zip}.
