@@ -15,3 +15,5 @@ pdf:
 	  --pdf \
 	  +m tutorial.scrbl
 
+test:
+	raco test -c redex-aam-tutorial
