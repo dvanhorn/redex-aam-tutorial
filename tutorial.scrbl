@@ -377,8 +377,8 @@ built-in patterns like @racket[number], @racket[variable],
 them in the language of @racket[REDEX].
 
 
-First, let's write a straightforward recursive metafunction that
-produces the first association of a given key:
+First, let's write a straightforward recursive judgment form that
+relates a given key to all its associations:
 
 @interaction[#:eval redex-eval
 (define-judgment-form REDEX
@@ -387,7 +387,7 @@ produces the first association of a given key:
   [(lookup (_ ... (any any_0) _ ...) any any_0)])
 ]
 
-This metafunction makes use of the @racket[any] pattern, which ranges
+This relation makes use of the @racket[any] pattern, which ranges
 over all values.  It also uses the @racket[_] pattern, which like
 @racket[any], will match anything, but unlike @racket[any] it is not a
 binder and therefore (1) it cannot be used on the right hand side and
@@ -396,19 +396,6 @@ constrained to match the same thing.
 
 The clause uses a non-linear pattern to require a binding to match the
 given key (notice the two left-hand occurrences of @racket[any]).
-
-@;{
-Although it won't come in hand just yet, let's also go ahead and
-define a version of @racket[lookup] that produces @emph{any} value
-associated with a given key.  For this, we will need to a relation:
-
-@interaction[#:eval redex-eval
-(define-judgment-form REDEX
-  #:mode (lookup I I O)
-  #:contract (lookup ((any any) ...) any any)
-  [(lookup (_ ... (any any_0) _ ...) any any_0)])
-]
-}
 
 @interaction[#:eval redex-eval
 (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 1))

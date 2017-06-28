@@ -156,7 +156,18 @@
 
 (module+ test
   (test-equal (judgment-holds (⇓ fact-5 () : V) V)
-              (term (120))))
+              (term (120)))
+
+  (test-equal
+   (judgment-holds
+    (⇓ (((λ ([x : num])
+           (λ ([x : num])
+             x))
+         0)
+        1)
+       () : V)
+    V)
+   (term (1))))
 
 (define-extended-language PCF⇓ PCF
   (V ::= N P)
