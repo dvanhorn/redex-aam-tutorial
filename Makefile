@@ -17,3 +17,9 @@ pdf:
 
 test:
 	raco test -c redex-aam-tutorial
+
+test-ci:
+	raco test --drdr --timeout +inf.0 -j 4 --package redex-aam-tutorial
+
+install:
+	raco pkg install ../redex-aam-tutorial

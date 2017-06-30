@@ -1,0 +1,21 @@
+language: racket
+sudo: false
+env:
+  global:
+    - RACKET_DIR=~/racket
+  matrix:
+    - RACKET_VERSION=HEAD
+
+before_install:
+ - git clone https://github.com/greghendershott/travis-racket.git
+ - cat travis-racket/install-racket.sh | bash
+ - export PATH="${RACKET_DIR}/bin:${PATH}"
+
+install:
+
+before_script:
+
+script:
+ - make install
+ - make test-ci
+ 
