@@ -37,7 +37,7 @@
 		       (alt . "Fork me on GitHub")
 		       (data-canonical-src . "https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png")))))]]
  
-@title{An Introduction to Redex with Abstracting Abstract Machines (v0.5)}
+@title{An Introduction to Redex with Abstracting Abstract Machines (v0.6)}
 
 @author+email["David Van Horn" "dvanhorn@cs.umd.edu"]
 
