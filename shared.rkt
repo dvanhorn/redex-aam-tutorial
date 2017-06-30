@@ -121,13 +121,13 @@
 
 ;; unique : determine if a list consists of unique elements
 (module+ test
-  (test-equal (term (unique)) #t)
-  (test-equal (term (unique 1)) #t)
-  (test-equal (term (unique 1 2 3 2)) #f))
+  (test-equal (term (unique ())) #t)
+  (test-equal (term (unique (1))) #t)
+  (test-equal (term (unique (1 2 3 2))) #f))
 
 (define-relation REDEX
-  unique ⊆ any × ...
-  [(unique any_!_1 ...)])
+  unique ⊆ (any ...)
+  [(unique (any_!_1 ...))])
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

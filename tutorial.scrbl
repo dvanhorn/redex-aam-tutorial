@@ -431,27 +431,27 @@ there is one; otherwise it prepends the new association to the list.
 
 Lastly, we will want to assert that @racket[λ]-bound variables are
 unique, so let's define a @racket[unique] predicate, which holds when
-all its arguments are distinct:
+its arguments are distinct:
 
 @interaction[#:eval redex-eval
 (define-metafunction REDEX
-  unique : any ... -> boolean
-  [(unique any_!_1 ...) #t]
-  [(unique _ ...) #f])
+  unique : (any ...) -> boolean
+  [(unique (any_!_1 ...)) #t]
+  [(unique (_ ...)) #f])
 ]
 
-This defines a @racket[unique] metafunction that takes any number of
-arguments and produces @racket[#t] when they are unique and
+This defines a @racket[unique] metafunction that takes a list of
+any number of elements and produces @racket[#t] when they are unique and
 @racket[#f] otherwise.  This uses a new kind of pattern, which uses
 the @tt{_!} naming prefix.  The meaning of this pattern is that
 repeated uses of it must be distinct, thus @racket[any_!_1 ...]
 matches disjoint sequences.
 
 @interaction[#:eval redex-eval
-(term (unique))
-(term (unique 1))
-(term (unique 1 2))
-(term (unique 1 2 3 2))
+(term (unique ()))
+(term (unique (1)))
+(term (unique (1 2)))
+(term (unique (1 2 3 2)))
 ]
 
 There is a kind of short-hand for defining predicates (metafunctions
@@ -460,14 +460,14 @@ that produce either true or false), called, confusingly enough,
 
 @interaction[#:eval redex-eval
 (define-relation REDEX
-  unique ⊆ any × ...
-  [(unique any_!_1 ...)])
+  unique ⊆ (any ...)
+  [(unique (any_!_1 ...))])
 ]
 
 It can be used just like a metafunction:
 @interaction[#:eval redex-eval
-(term (unique 1 2))
-(term (unique 1 2 3 2))
+(term (unique (1 2)))
+(term (unique (1 2 3 2)))
 ]
 
 
@@ -500,7 +500,7 @@ relation ``@racket[⊢]'':
    (⊢ Γ M_1 : T_1) ...  
    ----------------------- app
    (⊢ Γ (M_0 M_1 ..._1) : T)]  
-  [(unique X ...)
+  [(unique (X ...))
    (⊢ (ext Γ (X T) ...) M : T_n)
    ------------------------------------------ λ
    (⊢ Γ (λ ([X : T] ...) M) : (T ... -> T_n))])
