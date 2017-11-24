@@ -12,7 +12,7 @@ pdf:
 	  ++xref-in setup/xref load-collections-xref \
 	  --redirect-main http://docs.racket-lang.org/ \
 	  --dest out/ \
-	  --pdf \
+	  --xelatex \
 	  +m tutorial.scrbl
 
 test:
