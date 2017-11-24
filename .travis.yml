@@ -1,5 +1,5 @@
 language: racket
-sudo: false
+sudo: required
 dist: trusty
 env:
   global:
@@ -7,15 +7,12 @@ env:
   matrix:
     - RACKET_VERSION=HEAD
 
-addons:
-  apt:
-    packages:
-    - texlive-full
-
 before_install:
  - git clone https://github.com/greghendershott/travis-racket.git
  - cat travis-racket/install-racket.sh | bash
  - export PATH="${RACKET_DIR}/bin:${PATH}"
+ - git clone https://github.com/scottkosty/install-tl-ubuntu.git
+ - sudo ./install-tl-ubuntu
 
 install:
 
