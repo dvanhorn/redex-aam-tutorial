@@ -22,7 +22,7 @@
 
 @(define redex-eval
    (make-eval
-    '(require redex racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
+    '(require redex/reduction-semantics redex/pict racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
 
 @elem[#:style 
       (style #f (list (alt-tag "a") 
