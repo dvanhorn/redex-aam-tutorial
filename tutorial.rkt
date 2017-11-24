@@ -1,5 +1,5 @@
 #lang racket
-(require redex)
+(require redex/reduction-semantics)
 (require "shared.rkt")
 (provide (all-defined-out))
 
