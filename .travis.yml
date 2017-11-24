@@ -21,3 +21,4 @@ script:
  - make install
  - make test-ci
  - make html
+ - make pdf
