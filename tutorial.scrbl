@@ -1,6 +1,5 @@
 #lang scribble/manual
-@(require scriblib/autobib
-	  "ex.rkt"
+@(require "ex.rkt"
 	  "bib.rkt")
 @(require scribble/core
           scribble/html-properties
@@ -2369,7 +2368,8 @@ January 2016, and
 I'm grateful to the participants for their attention and feedback.  In
 particular, I'd like to thank Robby Findler, Matthias Felleisen, and
 Éric Tanter for helpful comments.  I'm grateful to Nada Amin, Michael
-Bernstein, Andrew Kent, and Phúc C. Nguyễn for pull requests.
+Bernstein, Andrew Kent, Phúc C. Nguyễn, and Leandro Facchinetti for
+pull requests.
 
 
 @;{
