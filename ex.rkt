@@ -3,12 +3,11 @@
 (require scribble/manual
          scribble/core
          scribble/decode
-	 2htdp/image
          "counter.rkt")
 
 (provide exercise Exref exref eop)
 
-(define eop (rectangle 3 10 'solid 'black)#;(image/plain "Images/qed.png"))
+(define eop "■")
 
 (define (exercise tag . content)
   (nested-flow
