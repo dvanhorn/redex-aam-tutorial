@@ -22,7 +22,7 @@
 
 @(define redex-eval
    (make-eval
-    '(require redex/reduction-semantics redex/pict racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
+    '(require redex/reduction-semantics #;redex/pict racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
 
 @elem[#:style 
       (style #f (list (alt-tag "a") 
@@ -2244,6 +2244,8 @@ semantics.
 
 Redex also has features for typesetting your semantics.  For example,
 you can render reduction relations, judgments, etc.:
+
+[DVH: Intentionally broken to see if this makes things work on Travis]
 
 @interaction[#:eval redex-eval
 (render-reduction-relation r)
