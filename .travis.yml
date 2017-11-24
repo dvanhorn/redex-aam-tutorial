@@ -12,7 +12,7 @@ before_install:
  - cat travis-racket/install-racket.sh | bash
  - export PATH="${RACKET_DIR}/bin:${PATH}"
  - git clone https://github.com/scottkosty/install-tl-ubuntu.git
- - sudo ./install-tl-ubuntu
+ - sudo ./install-tl-ubuntu/install-tl-ubuntu
 
 install:
 
