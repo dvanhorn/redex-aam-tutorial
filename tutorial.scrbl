@@ -2,15 +2,14 @@
 @(require scriblib/autobib
 	  "ex.rkt"
 	  "bib.rkt")
-@(require scribble/lp-include
-	  scribble/core
+@(require scribble/core
           scribble/html-properties
 	  racket/date
           (for-label (except-in racket _ add1 sub1 ... λ + * -> string any) 
                      (except-in redex I O)))
 
 @(require racket/sandbox
-          scribble/eval)
+          scribble/examples)
 @(define (make-eval . tops)
    (call-with-trusted-sandbox-configuration
      (lambda ()
@@ -23,6 +22,9 @@
 @(define redex-eval
    (make-eval
     '(require redex/reduction-semantics redex/pict racket/set #;redex/reduction-semantics redex-aam-tutorial/tutorial)))
+
+@(define-syntax-rule (eg d ...)
+   (examples #:label #f #:eval redex-eval d ...))
 
 @elem[#:style 
       (style #f (list (alt-tag "a") 
@@ -158,7 +160,7 @@ getting in to how to model semantics with Redex, let's just play with
 some simple examples.
 
 S-expressions are constructed with the @racket[term] form:
-@interaction[#:eval redex-eval
+@eg[
 (term 2)
 (term fred)
 (term ())
@@ -171,7 +173,7 @@ first think of @racket[term] as being synonymous with @racket[quote].
 A @deftech{language} is a set of s-expressions, defined by the
 @racket[define-language] form.  For example:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-language L
   (M ::= N F (M ...))
   (F ::= fred wilma)
@@ -199,7 +201,7 @@ used to match against elements of the language.
 
 The simplest operation is to ask whether an s-expression is an element
 of one of these sets.  For example:
-@interaction[#:eval redex-eval
+@eg[
 (redex-match? L N (term 2))
 (redex-match? L N (term 9))
 (redex-match? L N (term fred))
@@ -208,7 +210,7 @@ of one of these sets.  For example:
 
 In general, @racket[redex-match?] can use an arbitrary pattern, not
 just a non-terminal name:
-@interaction[#:eval redex-eval
+@eg[
 (redex-match? L (N ...) (term 2))
 (redex-match? L (N ...) (term (7 2 7)))
 (redex-match? L (M_1 M_2) (term (7 (2 fred))))
@@ -218,7 +220,7 @@ The last example demonstrates the use of subscripts in patterns, which
 serve to distinguish multiple occurrences of the same non-terminal
 name.  Had we left of the subscripts, the pattern would only match
 lists of two @emph{identical} terms:
-@interaction[#:eval redex-eval
+@eg[
 (redex-match? L (M M) (term (7 (2 fred))))
 (redex-match? L (M M) (term ((2 fred) (2 fred))))
 ]
@@ -229,7 +231,7 @@ by an ordered sequence of pattern and template clauses.  For example,
 here is a function that swaps occurrences of @racketresult[fred] and
 @racketresult[wilma]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction L
   swap : M -> M
   [(swap fred) wilma]
@@ -248,7 +250,7 @@ elements of the list.
 Now we can see the difference between @racket[quote] and
 @racket[term]: within the @racket[term] form, metafunctions are
 interpreted:
-@interaction[#:eval redex-eval
+@eg[
 (term (swap (wilma fred)))
 (eval:alts (code:quote (swap (wilma fred))) '(swap (wilma fred)))
 (term (7 (swap (wilma 2 (fred)))))
@@ -258,8 +260,8 @@ It's important to note that metafunction exist within Redex terms and
 are not functions in the host language.  Refering to metafunctions
 outside of @racket[term] causes a syntax error:
 
-@interaction[#:eval redex-eval
-(swap wilma)
+@eg[
+(eval:error (swap wilma))
 ]
 
 Now that we have seen the basics, we can move on to a real example.
@@ -278,7 +280,7 @@ includes natural numbers, functions, and primitive operations.  Terms
 include variables, values, applications, conditionals, and recursive
 functions.
 
-@interaction[#:eval redex-eval
+@eg[
 (define-language PCF
   (M ::= 
      N O X L 
@@ -321,7 +323,7 @@ requirement to the typing judgment (which we'll see next).
 As an example PCF program, here is a program that computes the
 factorial of 5:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-term fact-5
   ((μ (fact : (num -> num))
       (λ ([n : num])
@@ -336,7 +338,7 @@ within @racket[term].)
 
 We can write a test to make sure that this program is indeed in the
 language @racket[PCF]: 
-@interaction[#:eval redex-eval
+@eg[
 (test-equal (redex-match? PCF M (term fact-5)) #t)]
 
 @subsection{Typing judgement}
@@ -346,7 +348,7 @@ relation will, as usual, be defined in terms of a typing environment,
 which is missing from the PCF grammar.  Rather than revising the
 grammar, we can define a @deftech{language extension} as follows:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCFT PCF
   (Γ ::= ((X T) ...)))
 ]
@@ -367,7 +369,7 @@ built-in patterns of Redex and not the metavariables of languages we
 define.  To accomodate this, we first define the language of built-in
 patterns:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-language REDEX)
 ]
 
@@ -380,7 +382,7 @@ them in the language of @racket[REDEX].
 First, let's write a straightforward recursive judgment form that
 relates a given key to all its associations:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-judgment-form REDEX
   #:mode (lookup I I O)
   #:contract (lookup ((any any) ...) any any)
@@ -397,7 +399,7 @@ constrained to match the same thing.
 The clause uses a non-linear pattern to require a binding to match the
 given key (notice the two left-hand occurrences of @racket[any]).
 
-@interaction[#:eval redex-eval
+@eg[
 (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 1))
 (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 2))
 (judgment-holds (lookup ((x 1) (y 2) (x 3)) x 3))
@@ -411,7 +413,7 @@ extend an association list.  A simple definition that allows for an
 association to be extended with an arbitrary number of key-value pairs
 is then:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction REDEX
   ext1 : ((any any) ...) (any any) -> ((any any) ...)
   [(ext1 (any_0 ... (any_k any_v0) any_1 ...) (any_k any_v1))
@@ -433,7 +435,7 @@ Lastly, we will want to assert that @racket[λ]-bound variables are
 unique, so let's define a @racket[unique] predicate, which holds when
 its arguments are distinct:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction REDEX
   unique : (any ...) -> boolean
   [(unique (any_!_1 ...)) #t]
@@ -447,7 +449,7 @@ the @tt{_!} naming prefix.  The meaning of this pattern is that
 repeated uses of it must be distinct, thus @racket[any_!_1 ...]
 matches disjoint sequences.
 
-@interaction[#:eval redex-eval
+@eg[
 (term (unique ()))
 (term (unique (1)))
 (term (unique (1 2)))
@@ -458,14 +460,14 @@ There is a kind of short-hand for defining predicates (metafunctions
 that produce either true or false), called, confusingly enough,
 @racket[define-relation]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-relation REDEX
   unique ⊆ (any ...)
   [(unique (any_!_1 ...))])
 ]
 
 It can be used just like a metafunction:
-@interaction[#:eval redex-eval
+@eg[
 (term (unique (1 2)))
 (term (unique (1 2 3 2)))
 ]
@@ -475,7 +477,7 @@ It can be used just like a metafunction:
 With these generic operations in place, we can now define the typing
 relation ``@racket[⊢]'':
 
-@interaction[#:eval redex-eval
+@eg[
 (define-judgment-form PCFT
   #:mode (⊢ I I I O)
   #:contract (⊢ Γ M : T)  
@@ -533,7 +535,7 @@ from other judgment definitions or metafunctions.  The
 @;This prevents us, for example, from leaving off type annotations on
 @;@racket[λ]-bound variables and ``guessing'' them in the type judgment.
 
-@interaction[#:eval redex-eval
+@eg[
 (judgment-holds (⊢ () (λ ([x : num]) x) : (num -> num)))
 ]
 
@@ -546,14 +548,14 @@ bound to these types in the scope of the following term which, in this
 case is just @racket[T].  Consequently the result is the list of types
 for this program.
 
-@interaction[#:eval redex-eval
+@eg[
 (judgment-holds (⊢ () (λ ([x : num]) x) : T) T)
 (judgment-holds (⊢ () fact-5 : T) T)
 ]
 
 It's possible to illustrate judgments as follows:
 
-@interaction[#:eval redex-eval
+@eg[
 (eval:alts
 (show-derivations
  (build-derivations 
@@ -565,7 +567,7 @@ It's possible to illustrate judgments as follows:
 
 We can verify that ill-formed lambda-abstractions have no type:
 
-@interaction[#:eval redex-eval
+@eg[
 (judgment-holds (⊢ () (λ ([x : num] [x : num]) x) : T) T)
 ]
 
@@ -589,7 +591,7 @@ PCF:
   [(δ (sub1 N) ,(sub1 (term N)))]
   [(δ (add1 N) ,(add1 (term N)))]))
 
-@interaction[#:eval redex-eval
+@eg[
 (define r
   (reduction-relation 
    PCF #:domain M
@@ -628,7 +630,7 @@ This definition relies on two auxilary definitions: a @racket[δ]
 relation for interpreting primitive operations and a @racket[subst]
 metafunction which implements substitution.  
 
-@interaction[#:eval redex-eval
+@eg[
 (define-judgment-form PCF
   #:mode (δ I O)
   #:contract (δ (O N ...) N)
@@ -652,7 +654,7 @@ for subsitution.  If you'd like, you can install this package on the
 command line: @commandline{$ raco pkg install redex-aam-tutorial} and
 then import the @racket[subst] metafunction as follows:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (require redex-aam-tutorial/subst)
 (term (subst (x 5) (y 7) (+ x y)))
 ]
@@ -660,7 +662,7 @@ then import the @racket[subst] metafunction as follows:
 
 We can now use @racket[apply-reduction-relation] to see the results of
 applying the @racket[r] reduction relation to a term:
-@interaction[#:eval redex-eval 
+@eg[ 
 (apply-reduction-relation r (term (add1 5)))
 (apply-reduction-relation r (term ((λ ([x : num]) x) (add1 5))))
 (apply-reduction-relation r (term (sub1 ((λ ([x : num]) x) (add1 5)))))
@@ -674,7 +676,7 @@ inside the term, the term itself does not reduce.
 
 Using @racket[apply-reduction-relation*] will take any number of steps
 and return the set of irreducible terms:
-@interaction[#:eval redex-eval 
+@eg[ 
 (apply-reduction-relation* r (term (add1 5)))
 (apply-reduction-relation* r (term ((λ ([x : num]) x) (add1 5))))
 (apply-reduction-relation* r (term (sub1 ((λ ([x : num]) x) (add1 5)))))
@@ -688,7 +690,7 @@ We could define another reduction relation which incorporates progress
 rules.  Alternatively, we can use operations to compute such a
 relation from @racket[r]:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (compatible-closure r PCF M)
 ]
 
@@ -696,7 +698,7 @@ This example of the @racket[compatible-closure] operation computes a
 new relation that allows @racket[r] to be applied anywhere within a
 term @racket[M]:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (define -->r (compatible-closure r PCF M))
 (apply-reduction-relation* -->r (term ((λ ([x : num]) x) (add1 5))))
 (apply-reduction-relation* -->r (term (sub1 ((λ ([x : num]) x) (add1 5)))))
@@ -706,7 +708,7 @@ It's also possible to visualize each step of reduction using the
 @racket[traces] function, which launches a window showing each path of
 reduction.  For example:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (eval:alts (traces -->r (term ((λ ([x : num]) x) (add1 5)))) (void))
 ]
 
@@ -727,7 +729,7 @@ restrict where the reduction relation @racket[r] may be applied.
 For example, to obtain a reduction strategy that always reduces the
 left-most, outer-most redex, we can define evaluation context as
 follows:
-@interaction[#:eval redex-eval 
+@eg[ 
 (define-extended-language PCFn PCF
   (E ::= hole 
      (E M ...) 
@@ -738,12 +740,12 @@ follows:
 Now using @racket[context-closure], we can compute a relation that
 does the left-most, outer-most call-by-name reduction.
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (define -->n
   (context-closure r PCFn E))
 ]
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (eval:alts (traces -->n (term ((λ ([x : num]) x) (add1 5)))) (void))
 ]
 
@@ -752,12 +754,12 @@ does the left-most, outer-most call-by-name reduction.
 Unlike @racket[-->r], we can use @racket[-->n] to calculate
 @racket[fact-5]:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (apply-reduction-relation* -->n (term fact-5))
 ]
 
 We can also turn the example into a unit test:
-@interaction[#:eval redex-eval 
+@eg[ 
 (test-->> -->n (term fact-5) 120)
 ]
 
@@ -765,7 +767,7 @@ While we can't use @racket[apply-reduction-relation*] to compute
 @racket[fact-5] with @racket[-->r], we can test @racket[-->r] with
 @racket[test-->>∃], which tests for reachability:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (test-->>∃ -->r (term fact-5) 120)
 ]
 
@@ -778,7 +780,7 @@ In addition to call-by-name, we can also characterize left-most,
 outer-most call-by-value reduction with the following strategy and a
 restriction of the @racket[β] axiom:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (define-extended-language PCFv PCF
   (E ::= hole 
      (V ... E M ...)
@@ -805,14 +807,14 @@ Like @racket[-->n], the @racket[-->v] relation defines a deterministic
 reduction strategy, but it differs from @racket[-->n] in @emph{where}
 it reduces and @emph{what} it reduces:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (eval:alts (traces -->v (term ((λ ([x : num]) x) (add1 5)))) (void))
 ]
 
 @image[#:suffixes '(".pdf" ".png") #:scale .8]{img/cbv-reduction}
 
 And like @racket[-->n], it produces an answer for @racket[fact-5]:
-@interaction[#:eval redex-eval 
+@eg[ 
 (apply-reduction-relation* -->v (term fact-5))
 ]
 
@@ -821,7 +823,7 @@ are consistent with each other, but the @racket[-->n] relation
 produces more answers than @racket[-->v] as the following examples
 demonstrate:
 
-@interaction[#:eval redex-eval 
+@eg[ 
 (define-term Ω
   ((μ (loop : (num -> num))
       (λ ([x : num])
@@ -843,7 +845,7 @@ evaluation function.  This approach avoids substitution and instead
 represents substitutions lazily with a @deftech{closure}, which is a
 term paired with an environment mapping variable names to values:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCF⇓ PCF
   (V ::= N O (L ρ) ((μ (X : T) L) ρ))
   (ρ ::= ((X V) ...)))
@@ -856,7 +858,7 @@ association lists, so we will use the generic @racket[lookup] and
 The evaluation function @racket[⇓] can now be defined as a judgment as
 follows:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-judgment-form PCF⇓
   #:mode (⇓ I I I O)
   #:contract (⇓ M ρ : V)
@@ -900,12 +902,12 @@ follows:
 
 We can use it to compute examples:
 
-@interaction[#:eval redex-eval
+@eg[
 (judgment-holds (⇓ fact-5 () : V) V)
 ]
 
 Or test:
-@interaction[#:eval redex-eval
+@eg[
 (test-equal (judgment-holds (⇓ fact-5 () : 120)) #t)
 ]
 
@@ -924,7 +926,7 @@ reinterpreted over the new language; thus the original pattern
 variables of the original definition may take on new meaning.  So for
 example, consider this simple language and reduction relation:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-language L0 (M ::= number))
 
 (define r0 (reduction-relation L0 (--> M 5)))
@@ -935,28 +937,28 @@ example, consider this simple language and reduction relation:
 Suppose we then extend @racket[L0] by overriding the meaning of
 @racket[M] to include strings:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language L1 L0 (M ::= .... string))
 ]
 
 We can create an extension of @racket[r0] that is the reinterpretation
 of @racket[r0] over this new meaning of @racket[M]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define r0′ (extend-reduction-relation r0 L1))
 ]
 
 This works just fine and @racket[r0′] reduces as expected when applied
 to strings:
 
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation r0′ "seven")
 ]
 
 However, let's consider an alternative, seemingly equivalent
 development of the base relation that involves a metafunction:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction L0
   to-five : M -> M
   [(to-five M) 5])
@@ -973,8 +975,8 @@ would also reinterpret the definition of @racket[to-five], but it does
 not.  Consequently, applying @racket[r1′] to a string results in a
 run-time domain error from applying @racket[to-five] to a string:
 
-@interaction[#:eval redex-eval
-(apply-reduction-relation r1′ "seven")
+@eg[
+(eval:error (apply-reduction-relation r1′ "seven"))
 ]
 
 Relaxing the contract on @racket[to-five] is no help either; using a
@@ -987,7 +989,7 @@ But isn't there a mechanism for extending metafunctions?  Yes.  There
 is @racket[define-metafunction/extension], which allows you to define a
 @racket[L1] compatible version of @racket[to-five]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction/extension to-five L1 
   to-five/L1 : M -> M)
 
@@ -1032,7 +1034,7 @@ semantics is known as an @deftech{explicit substitution} semantics
 since the meta-theoretic notion of substitution is represented
 explicitly in the system@~cite[bib:explicit].
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCFρ PCF⇓
   (C ::= V (M ρ) (if0 C C C) (C C ...))
   (E ::= hole (V ... E C ...) (if0 E C C)))
@@ -1043,7 +1045,7 @@ generalized to either terms with environments, or conditionals or
 applications with closure sub-terms.  The reduction relation is now
 defined on the domain of closures:
 
-@interaction[#:eval redex-eval
+@eg[
 (define vρ
   (reduction-relation 
    PCFρ #:domain C
@@ -1080,20 +1082,20 @@ primitives and numbers.  The @racket[ρ-x] rule looks up the value of a
 variable in an environment.  The remaining cases are straightforward
 adaptations of the @racket[v] relation to the domain of closures.
 
-@interaction[#:eval redex-eval
+@eg[
 (define -->vρ
   (context-closure vρ PCFρ E))
 ]
 
 Let's define a simple injection from terms to closures:
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction PCFρ
   injρ : M -> C
   [(injρ M) (M ())])
 ]
 which we can use to inject programs into initial configurations
 before reducing:
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vρ (term (injρ fact-5)))
 ]
 
@@ -1113,7 +1115,7 @@ program.  In this section, we develop a stack machine that makes
 explicit the mechanism for finding redexes, thus eliminating the need
 for the @racket[context-closure] operation.
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCFς PCFρ
   (F ::= (V ... [] C ...) (if0 [] C C))
   (K ::= (F ...))
@@ -1168,7 +1170,7 @@ to obtain this relation.  The eval and continue transitions are
 straightforward and make explicit as reductions what
 @racket[context-closure] computes.
 
-@interaction[#:eval redex-eval
+@eg[
 (define -->vς
   (extend-reduction-relation
    @code:comment{Apply}
@@ -1197,7 +1199,7 @@ straightforward and make explicit as reductions what
 
 Again, we define an injection into initial configurations:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction PCFς
   injς : M -> ς
   [(injς M) ((injρ M) ())])
@@ -1205,7 +1207,7 @@ Again, we define an injection into initial configurations:
 
 We can verify the machine computes the expected results:
 
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vς (term (injς fact-5)))
 ]
 
@@ -1215,7 +1217,7 @@ computation, but with more transitions corresponding to the
 decomposition and recomposition of programs into evaluation contexts
 and redexes.  
 
-@interaction[#:eval redex-eval
+@eg[
 (eval:alts (traces -->vς (term (injς ((λ ([x : num]) x) (add1 5))))) (void))
 ]
 
@@ -1238,7 +1240,7 @@ In this model, we create a level of indirection in variable bindings
 so that environments will now map from variable names to addresses and
 the heap will resolve these addresses to values.
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCFσ PCFς
   (ρ ::= ((X A) ...))  
   (Σ ::= ((A V) ...))
@@ -1251,7 +1253,7 @@ lifted to operate within the context @racket[(hole Σ)], but then
 overriding the variable binding and dereference rules to allocate and
 dereference bindings via the heap:
 
-@interaction[#:eval redex-eval
+@eg[
 (define -->vσ
   (extend-reduction-relation
    (context-closure -->vς PCFσ (hole Σ))
@@ -1280,7 +1282,7 @@ irrelevant.  For function results though, we'll need to keep the heap
 to make sense of any environments inside the result.
 
 As usual, we give an injection function:
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction PCFσ
   injσ : M -> σ
   [(injσ M) ((injς M) ())])
@@ -1290,7 +1292,7 @@ The @racket[-->vσ] relation relies on a helper metafunction
 @racket[alloc], which allocates address for variables bindings.
 First, we define a metafunction for extracting formal parameter names:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction PCFσ
   formals : M -> (X ...)
   [(formals (λ ([X : T] ...) M)) (X ...)]
@@ -1302,7 +1304,7 @@ The @racket[alloc] metafunction consumes a state representing a
 @racket[β] or @racket[rec-β] redex and it produces a fresh address for
 each formal parameter name:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction PCFσ
   alloc : ((C K) Σ) -> (A ...)
   [(alloc ((((M ρ) V ...) K) Σ))
@@ -1314,7 +1316,7 @@ each formal parameter name:
 
 For example:
 
-@interaction[#:eval redex-eval
+@eg[
 (term (alloc (((((λ ([y : num] [z : num]) y) ()) 5 7) ()) ())))
 ]
 
@@ -1327,7 +1329,7 @@ approximating machines.
 
 When a redex is contracted, we see the bindings in the heap:
 
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation -->vσ
   (term (((((λ ([y : num] [z : num]) y) ()) 5 7) ()) ())))
 ]
@@ -1336,7 +1338,7 @@ Finally, we can verify the heap-based semantics remains faithful to
 previous semantics and computes the correct result for
 @racket[fact-5]:
 
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vσ (term (injσ fact-5)))
 ]
 
@@ -1409,7 +1411,7 @@ this, we do the following:
 
 The full code is now:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-syntax-rule (-->vσ/alloc alloc)
   (...
    (extend-reduction-relation
@@ -1437,7 +1439,7 @@ The full code is now:
 ]
 
 We can re-verify the relation works as expected:
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vσ (term (injσ fact-5)))
 ]
 
@@ -1445,7 +1447,7 @@ Of course, now we can experiment with different allocation strategies,
 such as one that generates fresh symbols, or another that uses the
 smallest available natural number:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction PCFσ
   alloc-gensym : ((C K) Σ) -> (A ...)
   [(alloc-gensym ((((M ρ) V ...) K) Σ))
@@ -1487,7 +1489,7 @@ supporting first-class continuations.  However, as we'll see, this is
 another step relevant to the AAM approach for constructing finite
 models of programs.
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCFσ* PCFσ
   (K ::= () (F A))
   (Σ ::= ((A U) ...))
@@ -1514,7 +1516,7 @@ instead of popping the stack.}
 Because we need to allocate continuation pointers, an extension of
 @racket[alloc] is required:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction/extension alloc PCFσ* 
   alloc* : ((C K) Σ) -> (A ...)
   [(alloc* (((if0 S_0 C_1 C_2) K) Σ))
@@ -1531,7 +1533,7 @@ Only the second component is necessary, but the first is helpful for
 making sense of what's going on.
 
 Some examples:
-@interaction[#:eval redex-eval
+@eg[
 (term (alloc* (((if0 ((add1 2) ()) (3 ()) (4 ())) ()) ())))
 
 (term (alloc* (((((λ ((y : num)) y) ()) ((add1 2) ())) ()) ())))
@@ -1541,7 +1543,7 @@ The @racket[alloc*] metafunction is an extension of @racket[alloc], so
 it behaves just like @racket[alloc] on @racket[β] and @racket[rec-β]
 redex configurations:
 
-@interaction[#:eval redex-eval
+@eg[
 (term (alloc* (((((λ ([y : num] [z : num]) y) ()) 5 7) ()) ())))
 ]
 
@@ -1554,7 +1556,7 @@ alloc*)].  And because we're likely to want to extend @racket[-->vσ*]
 further, we similarly abstract over the allocation metafunction again
 using @racket[define-syntax-rule], thus arriving at the following code:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-syntax-rule
   (-->vσ*/alloc alloc*)
   (...
@@ -1588,7 +1590,7 @@ using @racket[define-syntax-rule], thus arriving at the following code:
 
 And now we can verify the running example yet again:
 
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vσ* (term (injσ fact-5)))
 ]
 
@@ -1717,7 +1719,7 @@ already abstracted over allocations functions).
 To start, we have to go back to @racket[-->vσ] and abstract it as
 follows:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-syntax-rule (-->vσ/Σ alloc ext-Σ lookup-Σ)
   (...
    (extend-reduction-relation
@@ -1743,7 +1745,7 @@ follows:
 
 
 It's easy to recreate and test our previous relations and abstractions:
-@interaction[#:eval redex-eval
+@eg[
 (define-syntax-rule 
   (-->vσ/alloc alloc)
   (-->vσ/Σ alloc ext lookup))
@@ -1755,7 +1757,7 @@ It's easy to recreate and test our previous relations and abstractions:
 
 Next, we abstract @racket[-->vσ*]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-syntax-rule
   (-->vσ*/Σ alloc* ext-Σ lookup-Σ)
   (...
@@ -1787,7 +1789,7 @@ Next, we abstract @racket[-->vσ*]:
 
 And recreate and test:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-syntax-rule
   (-->vσ*/alloc alloc*)
   (-->vσ*/Σ alloc* ext lookup))
@@ -1804,7 +1806,7 @@ to define new relations.  For example, here is an implementation that
 models a heap as a Racket hash table that maps keys to @emph{sets} of
 values.
 
-@interaction[#:eval redex-eval
+@eg[
 (define-judgment-form REDEX
   #:mode (lookup-Σ I I O)
   #:contract (lookup-Σ any_r any_k any_v)
@@ -1835,7 +1837,7 @@ values.
 We have to extend the @racket[PCFσ*] language to reflect our change in
 the representation of heaps:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCFσ∘ PCFσ*
   (Σ ::= any))
 
@@ -1849,7 +1851,7 @@ the representation of heaps:
 
 Finally, we define @racket[-->vσ∘]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define -->vσ∘ (-->vσ∘/Σ alloc∘ ext-Σ lookup-Σ))
 
 (define-metafunction PCFσ∘
@@ -1906,7 +1908,7 @@ abstraction of numbers.  We'll use a particularly coarse abstraction
 here, but any sound, finite abstraction would work (e.g. we could use
 a domain of signs).  Here is our abstraction:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-extended-language PCFσ^ PCFσ∘
   (N ::= .... num))
 ]
@@ -1917,7 +1919,7 @@ number.  Having introduced this abstraction, we now provide an
 alternative interpretation of primitive operations that always
 produces @racket[num]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-judgment-form PCFσ^
   #:mode (δ^ I O)
   #:contract (δ^ (O N ...) N)
@@ -1937,7 +1939,7 @@ this symbol will just be the name of the variable.  Consequently, the
 approximation we compute will be what's known as a
 @deftech{monovariant} analysis:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction/extension alloc∘ PCFσ^
   alloc∘^ : ((C K) Σ) -> (A ...))
 
@@ -1956,7 +1958,7 @@ it covers all behavior abstracted by @racket[num].  Since a number may
 be zero or non-zero, we add cases to the reduction relation to take
 both branches when a conditional encounters @racket[num]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define -->vσ^ 
   (extend-reduction-relation
    (-->vσ∘/Σ alloc^ ext-Σ lookup-Σ)
@@ -1975,20 +1977,20 @@ both branches when a conditional encounters @racket[num]:
 
 Notice that now the reduction relation is truly a relation and not a
 function; some terms have multiple successors:
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vσ^ (term (injσ∘ (if0 (add1 0) 1 2))))]
 
 
 Now when we abstractly run our example, we see that results include
 @racket[num]:
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vσ^ (term (injσ∘ fact-5)))
 ]
 
 Here's another example that shows the approximation in bindings.
 Notice that @racket[_z] is bound to both @racket[0] and @racket[1], so
 both are given as possible results for this program:
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* 
  -->vσ^
  (term (injσ∘ ((λ ([f : (num -> num)])
@@ -1998,7 +2000,7 @@ both are given as possible results for this program:
 
 Here's an example where we can see that @racketresult[Ω] does not
 terminate; thus the analysis proves non-termination for this program:
-@interaction[#:eval redex-eval
+@eg[
 (apply-reduction-relation* -->vσ^ (term (injσ∘ Ω)))
 ]
 
@@ -2034,7 +2036,7 @@ We can formalize this observation by first defining what it means for
 a concrete state to be approximated by an abstract one.  We do so with
 a relation, @racket[⊑σ], which relates concrete and abstract states:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-relation PCFσ^
   ⊑σ ⊆ σ × σ
   [(⊑σ V_1 V_2)
@@ -2052,7 +2054,7 @@ values, addresses, environments, and stores.
 Approximation for values is simple; the interesting case is the base
 case that takes of abstract values @racket[num].
 
-@interaction[#:eval redex-eval
+@eg[
 (define-relation PCFσ^
   ⊑V ⊆ V × V
   [(⊑V N num)]
@@ -2068,7 +2070,7 @@ case that takes of abstract values @racket[num].
 Approximation for addresses follows from our choice of @racket[alloc*]
 and @racket[alloc^]:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-relation PCFσ^
   ⊑A ⊆ A × A
   [(⊑A (X any) X)]
@@ -2083,7 +2085,7 @@ counterpart.
 Environments, which are finite maps, are defined by the usual notion
 of inclusion for maps, combined with approximation in the range:
 
-@interaction[#:eval redex-eval
+@eg[
 ;; for every x ∈ dom(ρ_1)
 ;; if ρ_1(x) = a then
 ;; ρ_2(x) = a^ and a ⊑ a^ 
@@ -2102,7 +2104,7 @@ domain as well as the range and we have used a non-s-expression based
 representation.  The later means we cannot use Redex's pattern
 matching language to define the relation and instead escape to Racket:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-relation PCFσ^
   ⊑Σ ⊆ Σ × Σ
   [(⊑Σ Σ_1 Σ_2)
@@ -2150,7 +2152,7 @@ there are stuck states in the abstract trace.  Here's a variant of the
 factorial program that produces a function in the base case instead of
 a number:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-term fact-5-bug
   ((μ (fact : (num -> num))
      (λ ([n : num])
@@ -2183,7 +2185,7 @@ systems.  For example, this program never produces a run-time type
 error (because it loops), but is ill-typed according to the @racket[⊢]
 judgment:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-term safe
   (if0 Ω (5 7) (add1 add1)))
 
@@ -2197,7 +2199,7 @@ Moreover, we are given much more detail about what happens at run-time
 compared to a typical type system.  Suppose we had instead written
 this buggy factorial function that messes up the base case:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-term fact-5-zero
   ((μ (fact : (num -> num))
      (λ ([n : num])
@@ -2245,7 +2247,7 @@ semantics.
 Redex also has features for typesetting your semantics.  For example,
 you can render reduction relations, judgments, etc.:
 
-@interaction[#:eval redex-eval
+@eg[
 (render-reduction-relation r)
 ]
 
@@ -2381,7 +2383,7 @@ manifest with the following metafunctions, which are not used during
 reduction, but useful to state formal relationships between
 representations:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-metafunction PCFς
   K->E : K -> E
   [(K->E ()) hole]
@@ -2404,7 +2406,7 @@ representations:
 We can use Redex's random testing facility to test that @racket[E->K]
 and @racket[K->E] are inverses:
 
-@interaction[#:eval redex-eval
+@eg[
 ;(redex-check PCFς E (equal? (term E) (term (K->E (E->K E)))))
 ;(redex-check PCFς K (equal? (term K) (term (E->K (K->E K)))))
 ]
@@ -2418,7 +2420,7 @@ We can now state a ``representation'' relation between states and
 closures.  A state and closure are in the relation whenever the state
 is a representation of the closure:
 
-@interaction[#:eval redex-eval
+@eg[
 (define-relation PCFς
   ≈ςρ ⊆ ς × C
   [(≈ςρ V V)]
@@ -2439,7 +2441,7 @@ If @racket[ς] @racket[≈ςρ] @racket[C], then either:
 This invariant on reduction can be formalized as a predicate and
 verify it on some examples:
 
-@interaction[#:eval redex-eval
+@eg[
 @code:comment{Check above claim holds at each step of computation}
 (define-metafunction PCFς
   inv : ς C -> boolean
@@ -2476,7 +2478,7 @@ relation must be defined modulo consistent renaming of variables.)
 
 @section{Appendix: Substitution}
 
-@interaction[#:eval redex-eval
+@eg[
 (define-language L
   (T any)
   (M any)
