@@ -11,7 +11,7 @@ before_install:
  - cat travis-racket/install-racket.sh | bash
  - export PATH="${RACKET_DIR}/bin:${PATH}"
  - sudo apt-get update
- - sudo apt-get install texlive-latex-extra
+ - sudo apt-get install texlive-full
 
 install:
 
