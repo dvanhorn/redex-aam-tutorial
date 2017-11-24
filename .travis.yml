@@ -1,5 +1,6 @@
 language: racket
-sudo: false
+sudo: required
+dist: trusty
 env:
   global:
     - RACKET_DIR=~/racket
@@ -10,6 +11,7 @@ before_install:
  - git clone https://github.com/greghendershott/travis-racket.git
  - cat travis-racket/install-racket.sh | bash
  - export PATH="${RACKET_DIR}/bin:${PATH}"
+ - sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-full
 
 install:
 
@@ -19,3 +21,4 @@ script:
  - make install
  - make test-ci
  - make html
+ - make pdf
