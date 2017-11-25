@@ -13,6 +13,8 @@ before_install:
  - export PATH="${RACKET_DIR}/bin:${PATH}"
  - git clone https://github.com/scottkosty/install-tl-ubuntu.git
  - sudo ./install-tl-ubuntu/install-tl-ubuntu
+ - source /etc/environment
+ - which xelatex
 
 install:
 
