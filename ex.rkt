@@ -7,7 +7,7 @@
 
 (provide exercise Exref exref eop)
 
-(define eop "[]")
+(define eop "■")
 
 (define (exercise tag . content)
   (nested-flow
