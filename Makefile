@@ -4,6 +4,7 @@ html:
 	  ++xref-in setup/xref load-collections-xref \
 	  --redirect-main http://docs.racket-lang.org/ \
 	  --dest out/ \
+	  --dest-name index \
 	  +m tutorial.scrbl
 
 pdf:
