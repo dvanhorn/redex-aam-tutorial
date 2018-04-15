@@ -297,6 +297,23 @@ Symposium on Principles of Programming Languages (POPL)")
    #:location (book-location #:publisher "Prentice Hall")
    #:date "1981"))
 
+(define bib:adi
+  (make-bib
+    #:title "Abstracting Definitional Interpreters (Functional Pearl)"
+    #:author (authors "David Darais"
+                      PCN
+                      "Nicholas Labich"
+                      DVH)
+    #:location (proceedings-location "The ACM SIGPLAN International Conference on Functional Programming (ICFP)")
+    #:date "2017"))
+
+(define bib:scv-stateful
+  (make-bib
+    #:title "Soft Contract Verification for Higher-order Stateful Programs"
+    #:author (authors PCN "Thomas Gilray" STH DVH)
+    #:location (proceedings-location "The 45th ACM SIGPLAN Symposium on Principles of Programming Languages (POPL)")
+    #:date "2018"))
+
 (define bib:aam
   (make-bib
    #:title "Abstracting Abstract Machines"

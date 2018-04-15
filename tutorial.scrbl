@@ -2351,9 +2351,17 @@ escape to or be provided by the unknown, external world.  However, the
 AAM approach can be extended to perform modular analysis.  Rather than
 solving the modularity problem @emph{after} abstraction, an
 alternative approach is to construct a concrete semantics of modular
-(or incomplete) programs@~cite[bib:hose bib:scv bib:counterexamples]
-and then run through the usual AAM steps to obtain a modular abstract
-interpreter.
+(or incomplete) programs@~cite[bib:hose bib:scv bib:counterexamples
+bib:scv-stateful] and then run through the usual AAM steps to obtain a
+modular abstract interpreter.
+
+For a different perspective, it's possible to start from a
+compositional evaluation function---a definitional interpreter---and
+follow a similar sequence of abstraction steps to arrive at a
+computable abstraction@~cite[bib:adi].  This alternative perspective
+yields a pushdown model, but do so in a peculiar way: it inherits the
+property from the meta-language rather than through an explicit
+object-level model of the stack.
 
 @section{Acknowledgments}
 
