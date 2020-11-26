@@ -7,13 +7,15 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
+    - name: Install XeTeX
+      run: sudo apt-get install texlive-xetex
     - name: Install Racket
       uses: Bogdanp/setup-racket@v0.10
       with:
         architecture: 'x64'
         distribution: 'full'
         version: '7.9'
-    - name: Run Tests
+    - name: Build
       run: |
         make install
         make test-ci
