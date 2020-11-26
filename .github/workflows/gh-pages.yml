@@ -1,0 +1,26 @@
+on:
+  - push
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+    - name: Install Racket
+      uses: Bogdanp/setup-racket@v0.10
+      with:
+        architecture: 'x64'
+        distribution: 'full'
+        version: '7.9'
+    - name: Run Tests
+      run: |
+        make install
+        make test-ci
+        make html
+	make pdf
+    - name: Deploy to gh-page
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+	publish_dir: ./out
