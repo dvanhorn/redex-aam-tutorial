@@ -18,7 +18,7 @@ jobs:
         make install
         make test-ci
         make html
-	make pdf
+        make pdf
     - name: Deploy to gh-page
       uses: peaceiris/actions-gh-pages@v3
       with:
