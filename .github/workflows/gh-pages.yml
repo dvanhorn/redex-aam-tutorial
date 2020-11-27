@@ -8,7 +8,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
     - name: Install XeTeX
-      run: sudo apt-get install texlive-xetex
+      run: |
+        sudo apt-get install texlive-xetex
+        sudo apt-get install texlive-fonts-extra
     - name: Install Racket
       uses: Bogdanp/setup-racket@v0.10
       with:
