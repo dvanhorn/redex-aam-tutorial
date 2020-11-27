@@ -168,3 +168,13 @@ AddOnLoad(function(){
     indicator.innerHTML = label;
     indicator.style.display = "block";
   });
+
+// Pressing "S" or "s" focuses on the "...search manuals..." text field
+AddOnLoad(function(){
+  window.addEventListener("keyup", function(event) {
+    if (event && (event.keyCode == 83 || event.keyCode == 115) && event.target == document.body) {
+      var field = document.getElementsByClassName("searchbox")[0];
+      field.focus();
+    }
+  }, false);
+});
