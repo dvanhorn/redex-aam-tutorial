@@ -997,7 +997,7 @@ is @racket[define-metafunction/extension], which allows you to define a
 
 This defines a new metafunction, @racket[to-five/L1], which
 reinterprets the definition of @racket[to-five] over @racket[L1].  (We
-could aslo have added clauses to this definition, which are
+could also have added clauses to this definition, which are
 conceptually prepended to those of @racket[to-five], but there's no
 need in this case.)  However, this has no effect on the original
 definition of @racket[to-five], which is what is used within
